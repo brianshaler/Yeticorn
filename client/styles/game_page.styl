@@ -5,6 +5,11 @@
 .status-bar
   width: 100%
   background-color: #ddd
+  .left
+    float: left
+    width: 2.5em
+  .right
+    float: left
   .players
     height: 3em
   .player
@@ -15,7 +20,6 @@
       float: left
       height: 2em
     .username
-      float: left
       color: #444
   .current-player
     border: solid 1px #0f0
@@ -23,10 +27,14 @@
       font-weight: bold
       color: #000
   .stacks
+    white-space: nowrap
     .count
+      display: inline-block
       float: left
-      background-color: rgba(0,0,0,0.2)
+      background-color: rgba(127, 127, 127 ,0.2)
+      padding: 0.05em 0.3em 0.1em 0.3em
       border-radius: 1em
+      margin: 0 0.1em 0 0
 .game-page
   position: absolute
   width: 100%
@@ -83,18 +91,19 @@
       width: 14.2em
       height: 22.3em
       .label
+        font-size: 3em
         position: absolute
         color: #fff
         background: rgba(0,0,0,0.3)
         padding: 0px 4px 4px 4px
       .card-count
+        font-size: 3em
         position: absolute
         right: 0px
         bottom: 0px
         padding: 0px 4px 4px 4px
         color: #fff
         background: rgba(0,0,0,0.3)
-        font-size: 150%
         transform-origin: 100% 100%
       .cards
         position: absolute
