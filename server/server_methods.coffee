@@ -50,6 +50,7 @@ Meteor.methods
       crystalsIds.push crystalsId
     
     game.currentTurnId = game.players[0]
+    game.currentTurnEnergy = 0
     
     Games.update _id: gameId,
       $set:
@@ -59,6 +60,7 @@ Meteor.methods
         handIds: handIds
         crystalsIds: crystalsIds
         currentTurnId: game.currentTurnId
+        currentTurnEnergy: game.currentTurnEnergy
     
   endTurn: (gameId) ->
     check gameId, String
