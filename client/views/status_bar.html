@@ -1,0 +1,23 @@
+<template name="status_bar">
+  <div><input type="button" value="End Turn" class="end-turn" /></div>
+  <input type="button" value="View Map" class="btn btn-small view-map-btn" />
+  <input type="button" value="View Hand" class="btn btn-small view-hand-btn" />
+  <input type="button" value="View Crystals" class="btn btn-small view-crystals-btn" />
+  {{#if isMyTurn}}
+    ENERGY: {{currentTurnEnergy}}
+  {{/if}}
+  <div class="players">
+    {{#each players}}
+    <div class="player{{#if myTurn}} current-player{{/if}}">
+      <img src="{{avatar}}" />
+      <div class="username">{{username}}</div>
+      <div class="stacks">
+        {{#each stacks}}
+        <div class="count">{{count}}</div>
+        {{/each}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  <div class="clear: both"></div>
+</template>

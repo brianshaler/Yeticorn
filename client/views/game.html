@@ -1,0 +1,23 @@
+<template name="game">
+  {{#if game.started}}
+    <div class="status-bar">
+      {{> status_bar}}
+    </div>
+    <div class="game-page">
+      <div class="map-holder">
+          {{> map}}
+        <div class="game-board map-overlay" id="map-overlay">
+          {{> overlay}}
+        </div>
+      </div>
+      <div class="crystals-holder">
+        {{> crystals}}
+      </div>
+      <div class="hand-holder">
+        {{> hand}}
+      </div>
+    </div>
+  {{else}}
+    {{> players}}
+  {{/if}}
+</template>

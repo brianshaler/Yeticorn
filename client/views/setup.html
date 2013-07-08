@@ -1,0 +1,16 @@
+<template name="setup">
+  <ul>
+    {{#each players}}
+      <li>{{name}}{{#if isCreator}} (creator){{else}} (player){{/if}}</li>
+    {{/each}}
+  </ul>
+  {{#unless playerId}}
+  <form class="join-form" method="post" action="/">
+    <input type="text" class="player-name" placeholder="Player Name" />
+    <input type="submit" value="Join &raquo;" />
+  </form>
+  {{/unless}}
+  <div>
+    <a href="#" class="start">Start!</a>
+  </div>
+</template>

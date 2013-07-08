@@ -1,0 +1,5 @@
+<template name="card">
+  <div class="playing-card playing-card-{{type}}{{#if order}} card-order-{{order}}{{/if}}"{{#if order}}  data-order="{{order}}"{{/if}} data-type="{{type}}">
+    <img src="/images/cards/{{filename}}.png?name={{name}}" />
+  </div>
+</template>

@@ -1,0 +1,14 @@
+<template name="hand">
+  <div class="hand">
+    <h1>H</h1>
+    <div class="cards">
+      {{#isolate}}
+      {{#each hand.cards}}
+        {{> card}}
+      {{/each}}
+      {{/isolate}}
+    </div>
+    {{tmp}}
+  </div>
+  <div class="clear"></div>
+</template>

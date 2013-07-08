@@ -1,0 +1,10 @@
+<template name="players">
+  Waiting for players..
+  {{#each players}}
+    <div>
+      Player: {{displayName}}
+    </div>
+  {{/each}}
+  
+  <input type="button" value="Start" class="btn btn-small start-game" />
+</template>

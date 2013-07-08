@@ -1,0 +1,8 @@
+<template name="tile">
+  <div class="game-tile{{#if attributes.card}} tile-with-card{{/if}}" style="left: {{positionLeft this}}px; top: {{positionTop this}}px;">
+    {{#if attributes.player}}
+    <!-- <span>{{player.name}}</span> -->
+    <img src="/images/player_{{attributes.player.color}}.png" />
+    {{/if}}
+  </div>
+</template>

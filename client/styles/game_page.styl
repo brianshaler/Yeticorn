@@ -1,0 +1,146 @@
+@import 'nib'
+
+.page-container
+  height: 100%
+.status-bar
+  width: 100%
+  background-color: #ddd
+  .players
+    height: 3em
+  .player
+    float: left
+    margin: 0 1em 0.2em
+    img
+      display: block
+      float: left
+      height: 2em
+    .username
+      float: left
+      color: #444
+  .current-player
+    border: solid 1px #0f0
+    .username
+      font-weight: bold
+      color: #000
+  .stacks
+    .count
+      float: left
+      background-color: rgba(0,0,0,0.2)
+      border-radius: 1em
+.game-page
+  position: absolute
+  width: 100%
+  height: 100%
+  transform-origin: 0 0
+  .playing-card
+    border-radius: 2.2em
+    transform-origin: 0 0
+    box-shadow: 1px 1px 1em 0 rgba(0, 0, 0, 0.5)
+    padding: 0
+    width: 14.2em
+    height: 22.3em
+    img
+      width: 14.2em
+      height: 22.3em
+      pointer-events: none
+    h1, h2
+      color: #666
+      text-align: center
+      margin-top: 30px
+    h1
+      font-size: 32px
+    h2
+      font-size: 24px
+  .map-holder
+    width: 100%
+  .game-board
+    transform-origin: 0 0
+    .game-tile, tile
+      position: absolute
+      span
+        font-weight: bold
+      canvas
+        position: absolute
+        z-index: 1
+      a
+        position: absolute
+        z-index: 2
+        display: block
+        background-color: rgba(0, 255, 0, 0.2)
+        text-decoration: none
+  .crystals-holder
+    clear: both
+    left: 0px
+    width: 100%
+    background-color: #77a
+    font-size: 0.4em
+    .crystals-stack
+      transform: translate3d(0px, 0px, 0px)
+      float: left
+      background-color: #006599
+      border-left: solid 1px #fff
+      border-right: solid 1px #fff
+      width: 14.2em
+      height: 22.3em
+      .label
+        position: absolute
+        color: #fff
+        background: rgba(0,0,0,0.3)
+        padding: 0px 4px 4px 4px
+      .card-count
+        position: absolute
+        right: 0px
+        bottom: 0px
+        padding: 0px 4px 4px 4px
+        color: #fff
+        background: rgba(0,0,0,0.3)
+        font-size: 150%
+        transform-origin: 100% 100%
+      .cards
+        position: absolute
+    .crystals-stack-0
+      left: 0
+    .crystals-stack-1
+      left: 14.2em
+    .crystals-stack-2
+      left: 28.4em
+    .crystals-stack-3
+      left: 42.6em
+    .crystals-stack-4
+      left: 56.8em
+    .crystals-stack-5
+      left: 71em
+  .hand-holder
+    clear: both
+    float: left
+    width: 100%
+    background-color: #77a
+    font-size: 0.5em
+    text-align: center
+    .hand
+      width: 100%
+    .cards
+      width: 100%
+      text-align: center
+      .playing-card
+        text-align: center
+        display: inline-block
+
+.clear
+  height: 0px
+  line-height: 0
+  clear: both
+.game-page, .hand-holder, .crystals-holder, .map-holder
+  transition: transform 0.6s ease
+.hand-holder, .crystals-holder, .map-holder
+  position: absolute
+
+.view-hand
+  .map-holder, .crystals-holder
+    transform: translate3d(-100%, 0px, 0px)
+.view-crystals
+  .map-holder, .hand-holder
+    transform: translate3d(-100%, 0px, 0px)
+.view-map
+  .hand-holder, .crystals-holder
+    transform: translate3d(-100%, 0px, 0px)

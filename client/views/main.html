@@ -1,0 +1,82 @@
+<head>
+  <title>Yeticorn</title>
+  <meta name="viewport" content="width=600">
+</head>
+
+<body>
+  {{> root}}
+</body>
+
+<template name="root">
+  <div class="container outer-container" id="outer-container">
+    <div class="page-container" id="page-container">
+      {{#isolate}}{{renderPage}}{{/isolate}}
+    </div>
+  </div>
+  <div style="display: none;">{{setTitle}}</div>
+</template>
+
+<template name="page">
+  {{#if error}}
+    <div class="alert alert-error">{{error}}</div>
+  {{/if}}
+  
+  {{#if waitingList}}
+    <div class="alert alert-error">
+      <div>It's your turn!</div>
+      {{#each waitingList}}
+        <div>
+          <a href="/game/{{_id}}">{{#with player1._id}}{{userById}}{{/with}}{{#unless lonely}} vs {{#with player2._id}}{{userById}}{{/with}}{{/unless}}</a> ({{#if lonely}}awaiting opponent{{else}}{{moves}} moves{{/if}})
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+  <div style="float: right;">
+    <a href="/">Home</a>
+    {{#if currentUser}}<a href="/" class="logout">logout</a>{{/if}}
+  </div>
+  
+  {{#unless currentUser}}
+    {{> signup}}
+  {{/unless}}
+  
+  {{#if showGame}}
+    {{> game}}
+  {{else}}
+    {{#if currentUser}}
+      <h4>Start New Game</h4>
+      <input type="button" value="New Game" class="btn btn-small create-game" />
+      <h4>Games waiting for opponents:</h4>
+      {{#unless gameList}}None found.. I guess you should start one!{{/unless}}
+      {{#each gameList}}
+        <div>
+          <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
+        </div>
+      {{/each}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="signup">
+  <form class="signup-form alert">
+    <h4>You must be logged in to play</h4>
+    <div>(use some dumb password like 'asdf'; nobody cares)</div>
+    <p>
+      User name:
+      <input type="text" class="username" name="username" value="{{username}}" />
+    </p>
+    <p>
+      Password:
+      <input type="password" class="password" name="password" />
+    </p>
+    <input type="submit" class="btn btn-large" value="Sign up" />
+  </form>
+</template>
+
+<template name="loading">
+  <div></div>
+</template>
+
+<template name="not_found">
+not found.
+</template>

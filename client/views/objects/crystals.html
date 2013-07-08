@@ -1,0 +1,17 @@
+<template name="crystals">
+  <div class="crystals">
+    <h1>C</h1>
+    {{#each stacks}}
+      <div class="crystals-stack crystals-stack-{{order}}" data-energy="{{order}}">
+        <div class="cards">
+          {{#each cards}}
+            {{> card}}
+          {{/each}}
+        </div>
+        <div class="label unscaled">{{order}}pt</div>
+        <div class="card-count unscaled">{{count}}x</div>
+      </div>
+    {{/each}}
+  </div>
+  <div class="clear"></div>
+</template>
