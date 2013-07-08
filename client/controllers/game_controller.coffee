@@ -52,10 +52,22 @@ class @GameController
     Template.players.displayName = () ->
       displayName this
     
+    Template.players.canStart = () =>
+      lastUpdate = Session.get "lastUpdate"
+      return false if !@game?
+      @game.players.length > 1 and @game.owner == Meteor.userId()
+    
+    Template.players.canJoin = () =>
+      return false if !@game?
+      Meteor.userId() and -1 == @game.players.indexOf Meteor.userId()
+    
     Template.players.events
       "click .start-game": =>
         console.log "start game!"
         Meteor.call "startGame", Session.get "gameId"
+      "click .join-game": =>
+        console.log "join game!"
+        Meteor.call "addPlayer", Session.get "gameId"
     
     Template.status_bar.players = =>
       players = @getPlayers()
@@ -122,7 +134,7 @@ class @GameController
     lastUpdate = Session.get "lastUpdate"
     if !@game or !@game.players
       return false
-    return @game.players.length == 2
+    return @game.players.length >= 2
   
   myGame: =>
     lastUpdate = Session.get "lastUpdate"
@@ -136,8 +148,10 @@ class @GameController
     @game = Games.findOne Session.get "gameId"
     if !@game?.players?
       return []
+    id = 1
     players = _.map @game.players, (playerId) =>
       p = @playerById playerId
+      p.id = id++
       p.avatar = "/images/character/#{@game.characters[playerId]}1.png"
       p.crystals = Crystals.findOne gameId: @game._id, owner: playerId
       p.stacks = []

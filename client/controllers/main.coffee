@@ -39,7 +39,7 @@ class @App
     
     Template.page.gameList = =>
       games = Games.find($and: [
-        $where: "this.players.length == 1"
+        $where: "this.started == false"
         players:
           $ne: Meteor.userId()
       ]).fetch()

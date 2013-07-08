@@ -2,9 +2,18 @@
   Waiting for players..
   {{#each players}}
     <div>
-      Player: {{displayName}}
+      Player {{id}}: {{displayName}}
     </div>
   {{/each}}
   
-  <input type="button" value="Start" class="btn btn-small start-game" />
+  {{#if currentUser}}
+    {{#if canStart}}
+      <input type="button" value="Start" class="btn btn-small start-game" />
+    {{/if}}
+    {{#if canJoin}}
+      <input type="button" value="Join" class="btn btn-small join-game" />
+    {{/if}}
+  {{else}}
+  <div>Log in to join!</div>
+  {{/if}}
 </template>
