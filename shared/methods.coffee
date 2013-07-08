@@ -8,8 +8,8 @@ getGame = (gameId, userId) ->
     throw new Meteor.Error 404, "No such game"
   if game.currentTurnId != userId
     throw new Meteor.Error 403, "It's not your turn"
-  if game.players.length != 2
-    throw new Meteor.Error 403, "Game isn't ready. There must be 2 players"
+  if game.players.length < 2
+    throw new Meteor.Error 403, "Game isn't ready. There must be at least 2 players"
   game
 
 Meteor.methods
