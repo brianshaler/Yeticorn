@@ -1,0 +1,20 @@
+<template name="defense">
+  <div class="under-attack">
+    <div class="defense-popup">
+      <h4>YOU'RE UNDER ATTACK! {{totalAttack}}pt</h4>
+      <p>How much energy do you want to defend with?</p>
+      <p>
+        {{#each availableCrystals}}
+          <input type="button" class="btn crystals-button crystals-button-{{order}}" data-energy="{{order}}" value="{{order}}pt ({{count}})" {{#unless available}}disabled{{/unless}}/>
+        {{/each}}
+      </p>
+      <p>
+        <input type="button" class="btn btn-danger defense-button" value="Defend!" />
+        <input type="button" class="btn reset-defense-button" value="Reset" />
+      </p>
+      <div>
+        (You'll spend {{defenseEnergy}} and take {{pendingDamage}} damage)
+      </div>
+    </div>
+  </div>
+</template>

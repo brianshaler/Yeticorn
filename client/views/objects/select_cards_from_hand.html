@@ -1,0 +1,16 @@
+<template name="select_cards_from_hand">
+  <div class="{{#unless enoughSelected}}can-select-more{{/unless}}">
+  <h3>Choose {{typeAndQuantity}} from your hand</h3>
+  <p>
+    {{#each cards}}
+      <div style="font-size: 0.3em; float: left;">
+        {{> card}}
+        <input type="button" class="btn select-card" value="Select {{name}}" data-order="{{order}}" />
+      </div>
+    {{/each}}
+  </p>
+  <p class="align-right">
+    <input type="button" class="btn btn-success continue" value="{{#if enoughSelected}}Continue{{else}}Select above{{/if}}" {{#unless enoughSelected}}disabled{{/unless}} />
+    <input type="button" class="btn cancel" value="Cancel" />
+  </p>
+</template>

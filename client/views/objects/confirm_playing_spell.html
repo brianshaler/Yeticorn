@@ -1,0 +1,14 @@
+<template name="confirm_playing_spell">
+  <h3>Play this spell?</h3>
+  {{#with card}}
+    <p>
+      {{name}}<br />
+      {{description}}<br />
+      Play cost: {{playCost}}<br />
+    </p>
+    <p>
+      <input type="button" class="btn btn-success play-it" value="Play it!" />
+      <input type="button" class="btn cancel" value="Cancel" />
+    </p>
+  {{/with}}
+</template>

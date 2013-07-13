@@ -1,0 +1,16 @@
+<template name="energy_required">
+  <h3>You need {{energyRequired}} energy to do that</h3>
+  <p>
+    You have {{toSpend}} to spend, so you need to come up with {{energyDeficit}} more.
+  </p>
+  <p>
+    {{#each availableCrystals}}
+      <input type="button" class="btn crystals-button crystals-button-{{order}}" data-energy="{{order}}" value="{{order}}pt ({{count}})" {{#unless available}}disabled{{/unless}}/>
+    {{/each}}
+  </p>
+  <p class="align-right">
+    <input type="button" class="btn btn-success retry" value="{{#if enoughEnergy}}Continue{{else}}Not enough energy{{/if}}" {{#unless enoughEnergy}}disabled{{/unless}} />
+    <input type="button" class="btn reset-button" value="Reset" />
+    <input type="button" class="btn cancel" value="Cancel" />
+  </p>
+</template>

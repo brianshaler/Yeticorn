@@ -1,0 +1,20 @@
+<template name="select_opponents">
+  <div class="{{#unless enoughSelected}}can-select-more{{/unless}}">
+    <h3>Choose {{#if oneOpponent}}an opponent{{else}}opponents{{/if}}</h3>
+    <p>
+      {{#each opponentList}}
+        <div class="left">
+          <img src="{{avatar}}" width="72px"/>
+        </div>
+        <div class="right">
+          <div class="username">{{username}} ({{life}})</div>
+        </div>
+        <input type="button" class="btn opponent" value="select" data-id="{{_id}}" />
+      {{/each}}
+    </p>
+    <p class="align-right">
+      <input type="button" class="btn btn-success continue" value="{{#if enoughSelected}}Continue{{else}}Select above{{/if}}" {{#unless enoughSelected}}disabled{{/unless}} />
+      <input type="button" class="btn cancel" value="Cancel" />
+    </p>
+  </div>
+</template>

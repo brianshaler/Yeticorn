@@ -1,5 +1,6 @@
 Meteor.subscribe "players"
 Meteor.subscribe "games"
+Meteor.subscribe "recentGames"
 
 window.addEventListener "viewportchanged", (v) ->
   $(".game-page").css
@@ -8,19 +9,7 @@ window.addEventListener "viewportchanged", (v) ->
 app = null
 root = @
 
-Meteor.Router.add
-  "/game/:id": (id) ->
-    if !Session.get id
-      Session.set "visible", false
-    app.game.loadGame id
-    "page"
-  "/": ->
-    Session.set "visible", true
-    Session.set "gameId", null
-    Session.set "showGame", false
-    Session.set "createError", null
-    "page"
-  "*": "not_found"
+@initRoutes()
 
 class @App
   constructor: ->
@@ -33,26 +22,60 @@ class @App
       #Session.set "visible", true
       Deps.autorun =>
         lastUpdate = Session.set "lastUpdate", Date.now()
-    
-    Template.root.visible = =>
-      Session.get "visible"
-    
-    Template.page.gameList = =>
-      games = Games.find($and: [
-        $where: "this.started == false"
-        players:
-          $ne: Meteor.userId()
-      ]).fetch()
-      @addPlayerInfo games
-    
-    Template.page.showGame = ->
-      Session.get "showGame"
-    
-    Template.page.error = ->
-      Session.get "createError"
+  
+  # adds gameId as first parameter after method in Meteor.call()
+  @call: () =>
+    args = _.toArray arguments
+    method = args.shift()
+    args.unshift Session.get "gameId"
+    args.unshift method
+    Meteor.call.apply Meteor.call, args
+  
+  @alert: (str) =>
+    alert "Hey! #{str}"
+  
+  @getEnergy: (energyRequired, cb) =>
+    app.game.energyCallback = cb
+    Session.set "energyRequired", energyRequired
+  
+  @gotEnergy: (retry, cancel) =>
+    if app.game.energyCallback
+      app.game.energyCallback retry, cancel
+    app.game.energyCallback = false
+    Session.set "energyRequired", false
+  
+  @selectOpponents: (opponents, cb) =>
+    app.game.energyCallback = cb
+    Session.set "selectOpponents", opponents
+  
+  @selectFromHand: (type, quantity, cb) =>
+    app.game.energyCallback = cb
+    Session.set "selectionType", type
+    Session.set "selectCardsFromHand", quantity
   
   addPlayerInfo: (games) =>
     @game.addPlayerInfo games
+
+app = @app = new @App()
+
+Template.root.visible = =>
+  Session.get "visible"
+
+Template.page.gameList = =>
+  games = Games.find(
+    {$and: [
+      $where: "this.started == false"
+      players:
+        $ne: Meteor.userId()]}
+    {sort: createdDate: -1}
+  ).fetch()
+  app.addPlayerInfo games
+
+Template.page.showGame = ->
+  Session.get "showGame"
+
+Template.page.error = ->
+  Session.get "createError"
     
 Template.page.ownerName = () ->
   ownerName this
@@ -69,7 +92,7 @@ Template.page.events
   "click .join-button": (event, template) =>
     gameId = String $(event.target).attr "id"
     if gameId.length > 0
-      Meteor.call "addPlayer", gameId
+      App.call "addPlayer"
       Meteor.Router.to "/game/#{gameId}"
   "click .create-game": =>
     Meteor.call "createGame", 
@@ -109,4 +132,3 @@ Template.page.events
       Session.set "createError", err.message.replace("options.", "")
     false
 
-app = @app = new @App()

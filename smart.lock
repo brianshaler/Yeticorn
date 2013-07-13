@@ -3,8 +3,7 @@
   "dependencies": {
     "basePackages": {
       "router": {},
-      "crypto-md5": {},
-      "raphaeljs-package": {}
+      "crypto-md5": {}
     },
     "packages": {
       "router": {
@@ -16,11 +15,6 @@
         "git": "https://github.com/tmeasday/meteor-crypto-md5.git",
         "tag": "v0.0.1",
         "commit": "a0638a6cabfc84e19f2d5828f76aa8f6a0cc8c1a"
-      },
-      "raphaeljs-package": {
-        "git": "https://github.com/doubledare/raphaeljs-package.git",
-        "tag": "v0.1.0",
-        "commit": "3945af98a318e189d45e9118db4040ea8cbb9596"
       },
       "page-js-ie-support": {
         "git": "https://github.com/tmeasday/meteor-page-js-ie-support.git",

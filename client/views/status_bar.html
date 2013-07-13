@@ -1,10 +1,10 @@
 <template name="status_bar">
-  <div><input type="button" value="End Turn" class="end-turn" /></div>
+  <div><input type="button" value="End Turn" class="btn btn-small end-turn" /></div>
   <input type="button" value="View Map" class="btn btn-small view-map-btn" />
   <input type="button" value="View Hand" class="btn btn-small view-hand-btn" />
   <input type="button" value="View Crystals" class="btn btn-small view-crystals-btn" />
   {{#if isMyTurn}}
-    ENERGY: {{currentTurnEnergy}}
+    ENERGY: {{currentTurnEnergy}} / {{totalAvailableEnergy}}
   {{/if}}
   <div class="players">
     {{#each players}}
@@ -13,7 +13,7 @@
         <img src="{{avatar}}" />
       </div>
       <div class="right">
-        <div class="username">{{username}}</div>
+        <div class="username">{{username}} ({{life}})</div>
         <div class="stacks">
           {{#each stacks}}
           <div class="count">{{count}}</div>

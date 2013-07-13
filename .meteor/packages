@@ -9,3 +9,4 @@ coffeescript
 accounts-base
 accounts-password
 audit-argument-checks
+bootstrap

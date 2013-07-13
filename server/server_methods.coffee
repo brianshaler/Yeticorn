@@ -49,6 +49,9 @@ Meteor.methods
       handIds.push handId
       crystalsIds.push crystalsId
     
+    for player in game.players
+      game.life[player] = 20
+    
     game.currentTurnId = game.players[0]
     game.currentTurnEnergy = 0
     
@@ -61,7 +64,117 @@ Meteor.methods
         crystalsIds: crystalsIds
         currentTurnId: game.currentTurnId
         currentTurnEnergy: game.currentTurnEnergy
+        life: game.life
     
+  playCardFromHand: (gameId, cardIndex, toArea, options) ->
+    check gameId, String
+    check cardIndex, Number
+    check toArea, String
+    check options, Object
+    
+    saveDeck = false
+    
+    game = getGame gameId, @userId
+    hand = Hands.findOne
+      gameId: gameId
+      owner: @userId
+    card = hand.cards[cardIndex]
+    
+    # remove the card from hand
+    # but only after it's verified to be a valid move
+    pluck = ->
+      hand.cards.splice cardIndex, 1
+    
+    if toArea == "crystals" and card.type == "crystal"
+      pluck()
+      crystals = Crystals.findOne
+        gameId: gameId
+        owner: @userId
+      crystals.stacks[0].push card
+      Crystals.update _id: crystals._id,
+        $set:
+          stacks: crystals.stacks
+    else if toArea == "weapon" and card.type == "weapon"
+      pluck()
+      if card.playCost > game.currentTurnEnergy
+        throw new Meteor.Error 403, ErrorHelper.ENERGY_REQUIRED
+      game.currentTurnEnergy -= card.playCost
+      game.weapons[@userId] = card
+    else if toArea == "spell" and card.type == "spell"
+      if card.playCost > game.currentTurnEnergy
+        throw new Meteor.Error 403, ErrorHelper.ENERGY_REQUIRED
+      
+      myCardsIds = _.clone options.myCards
+      if options.myCards?.length > 0
+        options.myCards = _.map options.myCards, (index) =>
+          if index == cardIndex
+            throw new Meteor.Error 403, "You can't use the card you're playing!"
+          hand.cards[index]
+      
+      if !SpellHelper.conditionsMet card, options
+        throw new Meteor.Error 403, "You haven't met the conditions yet.."
+      
+      if card.opponentRandomCard? > 0
+        _.each options.opponents, (playerId) =>
+          _hand = Hands.findOne
+            gameId: gameId
+            owner: playerId
+          
+          for i in [1..opponentRandomCard]
+            if _hand.cards.length > 0
+              pickMe = Math.floor Math.random()*_hand.cards.length
+              if card.opponentCardTo? == "hand"
+                hand.cards.push _hand.cards[pickMe]
+              _hand.cards.splice pickMe, 1
+          Hands.update _id: _hand._id,
+            $set:
+              cards: _hand.cards
+      if card.takeWeapon == true
+        _.each options.opponents, (playerId) =>
+          if game.weapons[playerId]
+            hand.cards.push game.weapons[playerId]
+          game.weapons[playerId] = false
+      if card.myCardTo == "weapon"
+        game.weapons[options.opponents[0]] = options.myCards[0]
+      
+      left = _.filter hand.cards, (card, index) =>
+        keep = true
+        keep = false if index == cardIndex
+        if keep and myCardsIds?.length > 0
+          if -1 != myCardsIds.indexOf index
+            keep = false
+        keep
+      
+      hand.cards = left
+      
+      if card.drawCards? > 0
+        saveDeck = true
+        deck = Decks.findOne
+          gameId: gameId
+        for i in [1..card.drawCards]
+          hand.cards.push deck.cards.pop()
+      
+      if !game.spells?
+        game.spells = []
+      game.currentTurnEnergy -= card.playCost
+      if SpellHelper.isPersistent card
+        game.spells.push card
+      
+    else
+      throw new Meteor.Error 403, "NOPE."
+    
+    Games.update _id: gameId,
+      $set:
+        weapons: game.weapons
+        spells: game.spells
+        currentTurnEnergy: game.currentTurnEnergy
+    Hands.update _id: hand._id,
+      $set:
+        cards: hand.cards
+    if saveDeck
+      Decks.update _id: deck._id,
+        $set:
+          cards: deck.cards
   endTurn: (gameId) ->
     check gameId, String
     
@@ -69,6 +182,8 @@ Meteor.methods
     index = (1 + game.players.indexOf this.userId) % game.players.length
     game.currentTurnId = game.players[index]
     game.currentTurnEnergy = 0
+    game.movesThisTurn = 0
+    game.spells = []
     
     hand = Hands.findOne
       gameId: gameId
@@ -88,6 +203,8 @@ Meteor.methods
       $set:
         currentTurnId: game.currentTurnId
         currentTurnEnergy: game.currentTurnEnergy
+        movesThisTurn: game.movesThisTurn
+        spells: game.spells
     Decks.update _id: deck._id,
       $set:
         cards: deck.cards

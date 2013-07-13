@@ -34,10 +34,13 @@ class @CrystalsController
           targ = targ.parent()
           i++
         if energy == 0
-          alert "Can't spend uncharged crystals, dummy!"
+          App.alert "Can't spend uncharged crystals, dummy!"
         if energy == false
           return "i don't know what happened"
         if energy > 0
-          if confirm "spend #{energy}?"
-            Meteor.call "spendCrystals", Session.get("gameId"), energy
-            console.log "SHUT UP AND TAKE MY #{energy} CRYSTALS!"
+          spendingCrystals = [0,0,0,0,0,0]
+          spendingCrystals[energy] = 1
+          App.call "spendCrystals", spendingCrystals, (err, data) ->
+            if err?.reason
+              return App.alert err.reason
+          console.log "SHUT UP AND TAKE MY #{energy} CRYSTALS!"

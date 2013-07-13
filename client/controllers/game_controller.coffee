@@ -5,6 +5,11 @@ class @GameController
     @crystals = new CrystalsController()
     @board = new BoardController()
     
+    @energyCallback = false
+    
+    Session.set "spendingCrystals", [0,0,0,0,0,0]
+    Session.set "defendingCrystals", [0,0,0,0,0,0]
+    
     $(document).ready () ->
       $("body").addClass("view-hand")
     
@@ -19,6 +24,9 @@ class @GameController
     Deps.autorun =>
       lastUpdate = Session.set "lastUpdate", Date.now()
       @game = Games.findOne Session.get "gameId"
+      if @game?.currentTurnId != Meteor.userId()
+        Session.set "defendingCrystals", [0,0,0,0,0,0]
+        Session.set "spendingCrystals", [0,0,0,0,0,0]
       @board.render()
     
     Template.game.playerList = ->
@@ -34,19 +42,48 @@ class @GameController
     Template.game.displayName = () ->
       displayName this
     
-    Template.game.events
-      "click .challenge-button": (event, template) =>
-        id = String $(event.target).attr "id"
-        if id.length > 0
-          Meteor.call "challenge", @gameId(), id
-        #Meteor.call('invite', Session.get("selected"), this._id);
-      "click .ttt-enabled .move-btn": (event, template) =>
-        id = String $(event.target).attr "id"
-        Meteor.call "takeTurn", @gameId()
-      "click .end-turn": () =>
-        $("#tmp").html(Date.now())
-        Meteor.call "endTurn", Session.get("gameId"), (err, data) =>
-          console.log err, data
+    Template.game.showOverlay = =>
+      Template.game.underAttack() or
+      Template.game.waitingForDefense() or
+      Template.game.confirmPlayingWeapon() or
+      Template.game.confirmPlayingSpell() or
+      Template.game.energyRequired() or
+      Template.game.selectOpponents() or
+      Template.game.selectCardsFromHand() or
+      Template.game.showMyInfo()
+    
+    Template.game.underAttack = =>
+      lastUpdate = Session.get "lastUpdate"
+      if @game?.attack?.defender == Meteor.userId()
+        true
+      else
+        false
+    
+    Template.game.waitingForDefense = =>
+      lastUpdate = Session.get "lastUpdate"
+      if @game?.attack
+        true
+      else
+        false
+    
+    Template.game.confirmPlayingWeapon = =>
+      Session.get "confirmPlayingWeapon"
+    
+    Template.game.confirmPlayingSpell = =>
+      Session.get "confirmPlayingSpell"
+    
+    Template.game.showMyInfo = =>
+      Session.get "showMyInfo"
+    
+    Template.game.energyRequired = 
+    Template.energy_required.energyRequired = =>
+      Session.get "energyRequired"
+    
+    Template.game.selectOpponents = =>
+      Session.get "selectOpponents"
+    
+    Template.game.selectCardsFromHand = =>
+      Session.get "selectCardsFromHand"
     
     Template.players.players = @getPlayers
     Template.players.displayName = () ->
@@ -64,10 +101,10 @@ class @GameController
     Template.players.events
       "click .start-game": =>
         console.log "start game!"
-        Meteor.call "startGame", Session.get "gameId"
+        App.call "startGame"
       "click .join-game": =>
         console.log "join game!"
-        Meteor.call "addPlayer", Session.get "gameId"
+        App.call "addPlayer"
     
     Template.status_bar.players = =>
       players = @getPlayers()
@@ -75,7 +112,12 @@ class @GameController
       _.each players, (player) =>
         player.id = cnt++
         player.myTurn = player._id == @game.currentTurnId
+        player.life = @game.life[player._id]
       players
+    
+    Template.select_opponents.opponentList = =>
+      _.filter Template.status_bar.players(), (player) =>
+        player._id != Meteor.userId()
     
     Template.status_bar.isMyTurn = =>
       @game.currentTurnId == Meteor.userId()
@@ -83,6 +125,16 @@ class @GameController
     Template.status_bar.currentTurnEnergy = =>
       lastUpdate = Session.get "lastUpdate"
       @game.currentTurnEnergy
+    
+    Template.status_bar.totalAvailableEnergy = =>
+      crystals = Crystals.findOne
+        gameId: Session.get "gameId"
+        owner: Meteor.userId()
+      return "" if !crystals?.stacks?
+      total = 0
+      for i in [1..5]
+        total += crystals.stacks[i].length * i
+      total
     
     Template.status_bar.events
       "click .view-hand-btn": =>
@@ -98,8 +150,116 @@ class @GameController
           .addClass("view-crystals")
           .removeClass("view-map view-hand")
     
-    Template.map.date = ->
-      Date.now()
+    Template.defense.availableCrystals = =>
+      stacks = []
+      crystals = Crystals.findOne
+        gameId: Session.get "gameId"
+        owner: Meteor.userId()
+      return if !crystals?.stacks?
+      defendingCrystals = Session.get "defendingCrystals"
+      for i in [1..5]
+        avail = crystals.stacks[i].length - defendingCrystals[i]
+        stack =
+          order: i
+          available: avail > 0
+          count: if avail > 0 then avail else 0
+        stacks.push stack
+      stacks
+    
+    Template.defense.totalAttack = =>
+      lastUpdate = Session.get "lastUpdate"
+      return 0 if !@game?.attack?.weapon?
+      Gameplay.getDamage @game.attack.weapon, @game.attack.energy, @game.spells
+    
+    Template.defense.pendingDamage = =>
+      lastUpdate = Session.get "lastUpdate"
+      damage = 0
+      return 0 if !@game?.attack?
+      
+      if @game.attack.weapon
+        damage = Gameplay.getDamage @game.attack.weapon, @game.attack.energy, @game.spells
+      if Template.defense.defenseEnergy() > 0
+        damage -= Template.defense.defenseEnergy()
+      damage = 0 if damage < 0
+      damage
+    
+    Template.defense.defenseEnergy = =>
+      defendingCrystals = Session.get "defendingCrystals"
+      total = 0
+      for i in [1..5]
+        total += i * defendingCrystals[i]
+      total
+    
+    Template.defense.events
+      "click .crystals-button": (event) =>
+        energy = parseInt $(event.target).attr "data-energy"
+        defendingCrystals = Session.get "defendingCrystals"
+        defendingCrystals[energy]++
+        console.log "energy: #{energy} ", "defendingCrystals", defendingCrystals
+        Session.set "defendingCrystals", defendingCrystals
+      "click .defense-button": (event) =>
+        App.call "defend", Session.get "defendingCrystals"
+      "click .reset-defense-button": =>
+        Session.set "defendingCrystals", [0,0,0,0,0,0]
+    
+    Template.energy_required.availableCrystals = =>
+      stacks = []
+      crystals = Crystals.findOne
+        gameId: Session.get "gameId"
+        owner: Meteor.userId()
+      return if !crystals?.stacks?
+      spendingCrystals = Session.get "spendingCrystals"
+      for i in [1..5]
+        avail = crystals.stacks[i].length - spendingCrystals[i]
+        stack =
+          order: i
+          available: avail > 0
+          count: if avail > 0 then avail else 0
+        stacks.push stack
+      stacks
+    
+    Template.energy_required.toSpend = =>
+      lastUpdate = Session.get "lastUpdate"
+      toSpend = @game.currentTurnEnergy
+      spendingCrystals = Session.get "spendingCrystals"
+      for i in [1..5]
+        toSpend += i * spendingCrystals[i]
+      toSpend
+    
+    Template.energy_required.energyDeficit = =>
+      deficit = Session.get("energyRequired") - Template.energy_required.toSpend()
+      deficit = 0 if deficit < 0
+      deficit
+    
+    Template.energy_required.enoughEnergy = =>
+      lastUpdate = Session.get "lastUpdate"
+      Template.energy_required.toSpend() >= Session.get "energyRequired"
+    
+    Template.energy_required.events
+      "click .crystals-button": (event) =>
+        energy = parseInt $(event.target).attr "data-energy"
+        spendingCrystals = Session.get "spendingCrystals"
+        spendingCrystals[energy]++
+        Session.set "spendingCrystals", spendingCrystals
+      "click .retry": =>
+        spendingCrystals = Session.get "spendingCrystals"
+        App.call "spendCrystals", spendingCrystals, (err, data) ->
+          if err?.reason
+            return App.alert err.reason
+          Session.set "spendingCrystals", [0,0,0,0,0,0]
+          App.gotEnergy true
+      "click .reset-button": =>
+        Session.set "spendingCrystals", [0,0,0,0,0,0]
+      "click .cancel": =>
+        App.gotEnergy null, true
+        Session.set "spendingCrystals", [0,0,0,0,0,0]
+    
+    Template.wait_for_defense.stuff = =>
+      true
+    
+    Template.game.rendered = ->
+      if Template.game.showOverlay()
+        redrawOverlay()
   
   loadGame: (id) =>
     # access parameters in order a function args too
@@ -156,7 +316,6 @@ class @GameController
       p.crystals = Crystals.findOne gameId: @game._id, owner: playerId
       p.stacks = []
       if p.crystals?.stacks?.length > 0
-        console.log p.crystals
         p.stacks = _.map p.crystals.stacks, (stack) ->
           count: stack.length
       p
@@ -173,6 +332,31 @@ class @GameController
   playerById: (_id) =>
     Meteor.users.findOne _id
 
+redrawOverlay = ->
+  if Template.game.showOverlay()
+    viewportWidth = window.viewporter.viewportWidth
+    viewportHeight = window.viewporter.viewportHeight
+    $(".overlay").css
+      width: viewportWidth
+      height: viewportHeight
+    $(".overlay-popup").css
+      "max-width": Math.round viewportWidth*0.9
+    popupWidth = $(".overlay-popup").outerWidth()
+    popupHeight = $(".overlay-popup").outerHeight()
+    $(".overlay-popup").css
+      left: viewportWidth / 2 - popupWidth / 2
+      top: viewportHeight / 2 - popupHeight / 2
+window.addEventListener "viewportchanged", redrawOverlay
 
 Template.game.userById = () ->
   userById this
+
+Template.game.events
+  "click .challenge-button": (event, template) =>
+    id = String $(event.target).attr "id"
+    if id.length > 0
+      App.call "challenge", id
+  "click .end-turn": () =>
+    $("#tmp").html(Date.now())
+    App.call "endTurn", (err, data) =>
+      console.log err, data

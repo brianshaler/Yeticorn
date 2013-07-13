@@ -74,7 +74,6 @@
         position: absolute
         z-index: 2
         display: block
-        background-color: rgba(0, 255, 0, 0.2)
         text-decoration: none
   .crystals-holder
     clear: both
@@ -134,6 +133,17 @@
       .playing-card
         text-align: center
         display: inline-block
+.overlay
+  position: absolute
+  top: 0px
+  left: 0px
+  z-index: 99
+  background-color: rgba(0,0,0,0.5)
+  .overlay-popup
+    position: absolute
+    background-color: rgba(255,255,255, 0.8)
+    padding: 1.6em 2em
+    box-shadow 0.1em 0.2em 0.5em #000
 
 .clear
   height: 0px

@@ -1,7 +1,6 @@
 {
   "packages": {
     "router": {},
-    "crypto-md5": {},
-    "raphaeljs-package": {}
+    "crypto-md5": {}
   }
 }

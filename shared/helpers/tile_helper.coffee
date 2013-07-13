@@ -9,8 +9,11 @@ if Meteor.isClient
     orange: "/images/character/orange2.png"
     yellow: "/images/character/yellow2.png"
     Axe: "/images/cards/weapons/axe.png"
-    Spork: "/images/cards/weapons/spork.png"
     Pot: "/images/cards/weapons/pot.png"
+    "Ray Gun": "/images/cards/weapons/raygun.png"
+    Scissors: "/images/cards/weapons/scissors.png"
+    Shuriken: "/images/cards/weapons/shuriken.png"
+    Spork: "/images/cards/weapons/spork.png"
   
   assets = {}
   
@@ -104,6 +107,11 @@ class @TileHelper
         ctx.rotate(-Math.PI*.10)
         ctx.drawImage asset, -x3*.45, -y2*.4, imgw, imgh
         ctx.restore()
+    ctx.beginPath()
+    @hex ctx, x0, x1, x2, x3, y0, y1, y2
+    ctx.strokeStyle = "#ffffff"
+    ctx.lineWidth = 2
+    ctx.stroke()
   
   @hex: (ctx, x0, x1, x2, x3, y0, y1, y2) ->
     ctx.moveTo x1, y0

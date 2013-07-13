@@ -1,0 +1,16 @@
+<template name="confirm_playing_weapon">
+  <h3>Play this weapon?</h3>
+  {{#with card}}
+    <p>
+      {{name}}<br />
+      Play cost: {{playCost}}<br />
+      Use cost: {{useCost}}<br />
+      Damage: {{damage}}<br />
+      Range: {{range}}
+    </p>
+    <p>
+      <input type="button" class="btn btn-success play-it" value="{{#if enoughEnergy}}Play it!{{else}}Not enough energy{{/if}}" {{#unless enoughEnergy}}disabled{{/unless}} />
+      <input type="button" class="btn cancel" value="Cancel" />
+    </p>
+  {{/with}}
+</template>

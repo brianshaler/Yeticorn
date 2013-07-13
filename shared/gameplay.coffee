@@ -36,7 +36,8 @@ class @Gameplay
     board
   
   @positionPlayers: (board, players) ->
-    attempts = board.tiles.length * 5
+    attempts = board.tiles.length * 10
+    attempts = 100 if attempts < 100
     for player in players
       attempt = 0
       t = board.tiles[Math.floor Math.random()*board.tiles.length]
@@ -53,6 +54,28 @@ class @Gameplay
       match = tile if tile.column == column and tile.row == row
     match
   
+  @getStepsToTile: (tile1, tile2) ->
+    q1 = tile1.column
+    r1 = tile1.row
+    q2 = tile2.column
+    r2 = tile2.row
+    
+    cube1 = @offsetToCube q1, r1
+    cube2 = @offsetToCube q2, r2
+    dist = @cubicDistance cube1, cube2
+    
+    dist
+  
+  @offsetToCube: (q, r) ->
+    x = q
+    z = r - (q - (q&1)) / 2
+    y = -x-z
+    
+    {x: x, y: y, z: z}
+  
+  @cubicDistance: (cube1, cube2) ->
+    (Math.abs(cube1.x - cube2.x) + Math.abs(cube1.y - cube2.y) + Math.abs(cube1.z - cube2.z)) / 2
+  
   # modifies deck, returns hands
   @dealInitialHands: (deck, playerCount) ->
     cardCount = 5
@@ -63,3 +86,15 @@ class @Gameplay
       for hand in hands
         hand.push deck.cards.pop()
     hands
+  
+  @energyRequiredToMove: (distance) ->
+    1 + Math.floor(distance/2) + Math.pow((distance-1), 2)
+  
+  @getDamage: (weapon, energy, spells) ->
+    multiple = Math.floor energy/weapon.useCost
+    #damage = weapon.damage + (energy-weapon.useCost)
+    damage = multiple * weapon.damage + (energy % weapon.useCost)
+    if spells?.length > 0
+      for spell in spells
+        damage = SpellHelper.applySpellToAttack(spell, damage)
+    damage

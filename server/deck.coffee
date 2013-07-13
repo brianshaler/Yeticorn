@@ -10,7 +10,7 @@ class @Deck
     @cards = []
     
     weaponCards = Math.floor totalCards * .2
-    spellCards = Math.floor totalCards * .3
+    spellCards = spellCards = Math.floor totalCards * .3
     crystalCards = Math.floor totalCards - weaponCards - spellCards
 
     for i in [1..weaponCards]
