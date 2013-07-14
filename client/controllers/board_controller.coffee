@@ -63,7 +63,7 @@ class @BoardController
     @move {column: myColumn, row: myRow}, clickedTile, true
   
   move: (fromTile, toTile, canRetry = false) =>
-    dist = Gameplay.getStepsToTile fromTile, toTile
+    dist = BoardHelper.getStepsToTile fromTile, toTile
     App.call "moveTo", toTile.column, toTile.row, (err, data) =>
       if err and err.reason
         if err.reason == ErrorHelper.ENERGY_REQUIRED
@@ -73,7 +73,7 @@ class @BoardController
             else
               "cancel"
         else
-          App.alert err.reason
+          App.error err.reason
   
   attack: (tile, canRetry = false) =>
     @game = Games.findOne Session.get "gameId"
@@ -87,7 +87,9 @@ class @BoardController
       #return App.alert "Not enough energy!"
     else
       console.log "attacking!", tile, @game.currentTurnEnergy
-      App.call "attack", tile.column, tile.row, @game.currentTurnEnergy
+      App.call "attack", tile.column, tile.row, @game.currentTurnEnergy, (err, data) =>
+        if err and err.reason
+          App.error err.reason
   
   render: () =>
     return if !@board?.tiles? or !@game?

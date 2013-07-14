@@ -16,65 +16,28 @@ class @Gameplay
     board.columns = w
     board.rows = h
     
-    @setCardPickups board
     @positionPlayers board, players
+    board.tiles[Math.floor Math.random()*board.tiles.length].gypsy = true
+    BoardHelper.moveGypsy board
+    BoardHelper.moveGypsy board
     
-    board
-  
-  @setCardPickups: (board) ->
-    inner = (board.columns-2) * (board.rows-2)
-    pickups = []
-    while inner > 3 and pickups.length / inner < 1 / 9
-      r = Math.floor Math.random()*inner
-      if -1 == pickups.indexOf r
-        pickups.push r
-    for index in pickups
-      row = Math.floor(index/(board.columns-2))
-      column = index - (row*(board.columns-2))
-      t = @getTileAt board, column+1, row+1
-      t.cardPickup = true
     board
   
   @positionPlayers: (board, players) ->
     attempts = board.tiles.length * 10
-    attempts = 100 if attempts < 100
+    attempts = 200 if attempts < 200
     for player in players
       attempt = 0
       t = board.tiles[Math.floor Math.random()*board.tiles.length]
-      while !t.cardPickup and !t.player and attempt < attempts
+      while t.player and attempt < attempts
         t = board.tiles[Math.floor Math.random()*board.tiles.length]
         attempt++
       # do something if too many attempts!
+      console.log "Adding #{player} to #{t.row}x#{t.column} #{attempt}"
+      if t.player
+        throw new Meteor.Error 500, "Trying to add a player to a tile that already has a player.. #{attempt}"
       t.player = player
     board
-  
-  @getTileAt: (board, column, row) ->
-    match = null
-    for tile in board.tiles
-      match = tile if tile.column == column and tile.row == row
-    match
-  
-  @getStepsToTile: (tile1, tile2) ->
-    q1 = tile1.column
-    r1 = tile1.row
-    q2 = tile2.column
-    r2 = tile2.row
-    
-    cube1 = @offsetToCube q1, r1
-    cube2 = @offsetToCube q2, r2
-    dist = @cubicDistance cube1, cube2
-    
-    dist
-  
-  @offsetToCube: (q, r) ->
-    x = q
-    z = r - (q - (q&1)) / 2
-    y = -x-z
-    
-    {x: x, y: y, z: z}
-  
-  @cubicDistance: (cube1, cube2) ->
-    (Math.abs(cube1.x - cube2.x) + Math.abs(cube1.y - cube2.y) + Math.abs(cube1.z - cube2.z)) / 2
   
   # modifies deck, returns hands
   @dealInitialHands: (deck, playerCount) ->
@@ -87,6 +50,14 @@ class @Gameplay
         hand.push deck.cards.pop()
     hands
   
+  @newGypsyCards: ->
+    cards = []
+    for i in [1..2]
+      cards.push Cards.getWeapon()
+    for i in [1..2]
+      cards.push Cards.getSpell()
+    cards
+  
   @energyRequiredToMove: (distance) ->
     1 + Math.floor(distance/2) + Math.pow((distance-1), 2)
   
@@ -98,3 +69,13 @@ class @Gameplay
       for spell in spells
         damage = SpellHelper.applySpellToAttack(spell, damage)
     damage
+  
+  @livingPlayers: (game) ->
+    _.filter game.players, (playerId) ->
+      game.life[playerId] > 0
+  
+  @declareWinner: (winner = false) ->
+    if winner
+      "#{winner.username} won!"
+    else
+      "Everyone is dead!"

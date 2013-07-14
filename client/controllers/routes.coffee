@@ -9,15 +9,12 @@
       else
         return page
   Meteor.Router.filter "checkLoggedIn"
-
+  
   Meteor.Router.add
     "/game/:id": (id) ->
-      if !Session.get id
-        Session.set "visible", false
       app.game.loadGame id
       "page"
     "/": ->
-      Session.set "visible", true
       Session.set "gameId", null
       Session.set "showGame", false
       Session.set "createError", null

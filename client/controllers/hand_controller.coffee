@@ -3,6 +3,14 @@ class @HandController
     @cards = []
     @hand = {}
     
+    Session.set "cardIndex", false
+    Session.set "confirmPlayingWeapon", false
+    Session.set "confirmPlayingSpell", false
+    Session.set "spellConditions", {}
+    Session.set "selectOpponents", false
+    Session.set "selectionType", false
+    Session.set "selectCardsFromHand", false
+    
     Meteor.autosubscribe =>
       Meteor.subscribe "hand", Session.get("gameId") if Session.get("gameId")
     
@@ -27,8 +35,6 @@ class @HandController
           return App.alert "I CAN'T WORK UNDER THESE CONDITIONS!"
         
         game = Games.findOne Session.get "gameId"
-        if game.currentTurnId != Meteor.userId()
-          return App.alert "It's not your turn"
         
         if card?.type == "crystal"
           @playCard cardIndex, "crystals", {}, true

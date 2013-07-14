@@ -9,7 +9,7 @@
         {{/each}}
       </p>
       <p>
-        <input type="button" class="btn btn-danger defense-button" value="Defend!" />
+        <input type="button" class="btn {{#if pendingDamage}}btn-danger{{else}}btn-success{{/if}} defense-button" value="{{#if pendingDamage}}Take it!{{else}}Defend!{{/if}}" />
         <input type="button" class="btn reset-defense-button" value="Reset" />
       </p>
       <div>

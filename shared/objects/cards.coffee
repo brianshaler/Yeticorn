@@ -5,10 +5,10 @@ class @Cards
   
   @getWeapon: (name = "") ->
     weapon = false
-    name = name.toLowerCase()
-    if name != ""
+    code = Card.toCode name
+    if code != ""
       weapon = _.find @weapons, (w) =>
-        w.name.toLowerCase() == name or w.code.toLowerCase() == name
+        w.code == code
     if !weapon
       weapon = @weapons[Math.floor Math.random()*@weapons.length]
     
@@ -16,10 +16,10 @@ class @Cards
   
   @getSpell: (name = "") ->
     spell = false
-    name = name.toLowerCase()
-    if name != ""
+    code = Card.toCode name
+    if code != ""
       spell = _.find @spells, (s) =>
-        s.name.toLowerCase() == name or s.code.toLowerCase() == name
+        s.code == code
     if !spell
       spell = @spells[Math.floor Math.random()*@spells.length]
     console.log spell if !spell.toObject
@@ -42,6 +42,9 @@ class @Card
     
     @fromObject obj
   
+  @toCode: (name = "") ->
+    name.toLowerCase().replace /[^A-Z^a-z^0-9]/g, "_"
+  
   fromObject: (obj = {}) =>
     for k, v of obj
       if @props.indexOf(k) == -1
@@ -50,7 +53,7 @@ class @Card
   
   toObject: =>
     obj = {}
-    @code = @name.toLowerCase().replace " ", "_"
+    @code = Card.toCode @name
     for prop in @props
       if @[prop]?
         obj[prop] = @[prop]
@@ -146,14 +149,20 @@ Cards.spells.push new Spell
   name: "Draw Card"
   filename: "weapons/spork"
   description: "Draw a card"
-  playCost: 2
+  playCost: 0
   drawCards: 1
 Cards.spells.push new Spell
   name: "Draw Cards"
   filename: "weapons/spork"
   description: "Draw 2 cards"
-  playCost: 3
+  playCost: 1
   drawCards: 2
+Cards.spells.push new Spell
+  name: "Band-aid"
+  filename: "weapons/spork"
+  description: "Gain 5 life"
+  playCost: 1
+  gainLife: 5
 Cards.spells.push new Spell
   name: "Charity"
   filename: "weapons/spork"
@@ -199,3 +208,16 @@ Cards.spells.push new Spell
   description: "Double damage! (Play this card before your attack)"
   playCost: 4
   multiplyDamage: 2.0
+Cards.spells.push new Spell
+  name: "Fountain of Youth"
+  filename: "weapons/spork"
+  description: "Gain 20 life"
+  playCost: 5
+  gainLife: 20
+Cards.spells.push new Spell
+  name: "Lightning"
+  filename: "weapons/spork"
+  description: "Selected opponent loses 5 life. And of course you can't defend against lightning!"
+  playCost: 6
+  selectOpponent: 1
+  loseLife: 5

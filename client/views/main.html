@@ -40,19 +40,23 @@
     {{> signup}}
   {{/unless}}
   
-  {{#if showGame}}
-    {{> game}}
+  {{#if gameLoading}}
+    {{> loading}}
   {{else}}
-    {{#if currentUser}}
-      <h4>Start New Game</h4>
-      <input type="button" value="New Game" class="btn btn-small create-game" />
-      <h4>Games waiting for opponents:</h4>
-      {{#unless gameList}}None found.. I guess you should start one!{{/unless}}
-      {{#each gameList}}
-        <div>
-          <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
-        </div>
-      {{/each}}
+    {{#if showGame}}
+      {{> game}}
+    {{else}}
+      {{#if currentUser}}
+        <h4>Start New Game</h4>
+        <input type="button" value="New Game" class="btn btn-small create-game" />
+        <h4>Games waiting for opponents:</h4>
+        {{#unless gameList}}None found.. I guess you should start one!{{/unless}}
+        {{#each gameList}}
+          <div>
+            <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
+          </div>
+        {{/each}}
+      {{/if}}
     {{/if}}
   {{/if}}
 </template>
@@ -74,7 +78,7 @@
 </template>
 
 <template name="loading">
-  <div></div>
+  <div>Loading...</div>
 </template>
 
 <template name="not_found">

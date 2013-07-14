@@ -14,6 +14,7 @@ if Meteor.isClient
     Scissors: "/images/cards/weapons/scissors.png"
     Shuriken: "/images/cards/weapons/shuriken.png"
     Spork: "/images/cards/weapons/spork.png"
+    gypsy: "/images/gypsy.png"
   
   assets = {}
   
@@ -43,7 +44,7 @@ class @TileHelper
   
   @boardHeight: (boardRows, scale = 1) ->
     bh = Tile::height * (0.5+boardRows) * scale
-    
+  
   @drawTile: (tile, canvas) =>
     ctx = canvas.getContext("2d")
     
@@ -61,6 +62,15 @@ class @TileHelper
     ctx.fillStyle = "#eee"
     @hex ctx, x0, x1, x2, x3, y0, y1, y2
     ctx.fill()
+    
+    if tile.gypsy and assets.gypsy
+      ctx.save()
+      ctx.beginPath()
+      @hex ctx, x0, x1, x2, x3, y0, y1, y2
+      ctx.closePath()
+      ctx.clip()
+      ctx.drawImage assets.gypsy, 0, 0, w, h
+      ctx.restore()
     
     #tile.player and 
     if tile.character and assets[tile.character]

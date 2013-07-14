@@ -1,5 +1,8 @@
 class @CharacterHelper
+  # currently using full character renders, but we may want to build characters dynamically
   @allCharacters = ["black", "blue", "orange", "yellow"]
+  @facialHair = ["none", "mustache", "beard", "neckbeard"]
+  @eyeWear = ["none", "glasses"]
   
   @getRandomCharacter: (taken = []) ->
     character = @allCharacters[0]

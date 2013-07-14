@@ -54,6 +54,8 @@ Meteor.methods
     
     game.currentTurnId = game.players[0]
     game.currentTurnEnergy = 0
+    game.tradeWithGypsy = false
+    game.gypsyCards = Gameplay.newGypsyCards()
     
     Games.update _id: gameId,
       $set:
@@ -64,6 +66,8 @@ Meteor.methods
         crystalsIds: crystalsIds
         currentTurnId: game.currentTurnId
         currentTurnEnergy: game.currentTurnEnergy
+        tradeWithGypsy: game.tradeWithGypsy
+        gypsyCards: game.gypsyCards
         life: game.life
     
   playCardFromHand: (gameId, cardIndex, toArea, options) ->
@@ -129,12 +133,15 @@ Meteor.methods
           Hands.update _id: _hand._id,
             $set:
               cards: _hand.cards
-      if card.takeWeapon == true
+      if card.takeWeapon? == true
         _.each options.opponents, (playerId) =>
           if game.weapons[playerId]
             hand.cards.push game.weapons[playerId]
           game.weapons[playerId] = false
-      if card.myCardTo == "weapon"
+      if card.loseLife? > 0
+        _.each options.opponents, (playerId) =>
+          game.life[playerId] -= card.loseLife
+      if card.myCardTo? == "weapon"
         game.weapons[options.opponents[0]] = options.myCards[0]
       
       left = _.filter hand.cards, (card, index) =>
@@ -154,6 +161,9 @@ Meteor.methods
         for i in [1..card.drawCards]
           hand.cards.push deck.cards.pop()
       
+      if card.gainLife? > 0
+        game.life[@userId] += card.gainLife
+      
       if !game.spells?
         game.spells = []
       game.currentTurnEnergy -= card.playCost
@@ -165,6 +175,7 @@ Meteor.methods
     
     Games.update _id: gameId,
       $set:
+        life: game.life
         weapons: game.weapons
         spells: game.spells
         currentTurnEnergy: game.currentTurnEnergy
@@ -179,11 +190,16 @@ Meteor.methods
     check gameId, String
     
     game = getGame gameId, this.userId
-    index = (1 + game.players.indexOf this.userId) % game.players.length
-    game.currentTurnId = game.players[index]
+    
+    livingPlayers = Gameplay.livingPlayers game
+    index = (1 + livingPlayers.indexOf @userId) % livingPlayers.length
+    game.currentTurnId = livingPlayers[index]
+    MessageHelper.sendMessage gameId, livingPlayers[index], "It's your turn!"
     game.currentTurnEnergy = 0
     game.movesThisTurn = 0
     game.spells = []
+    game.tradeWithGypsy = false
+    game.gypsyCards = Gameplay.newGypsyCards()
     
     hand = Hands.findOne
       gameId: gameId
@@ -199,12 +215,16 @@ Meteor.methods
     
     crystals.stacks = CrystalsHelper.incrementAll crystals.stacks
     
+    BoardHelper.moveGypsy Boards.findOne gameId: gameId
+    
     Games.update _id: gameId,
       $set:
         currentTurnId: game.currentTurnId
         currentTurnEnergy: game.currentTurnEnergy
+        tradeWithGypsy: game.tradeWithGypsy
         movesThisTurn: game.movesThisTurn
         spells: game.spells
+        gypsyCards: game.gypsyCards
     Decks.update _id: deck._id,
       $set:
         cards: deck.cards

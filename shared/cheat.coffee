@@ -8,3 +8,10 @@ class @Cheat
   
   @getWeapon: (name = "") ->
     App.call "cheat", "getWeapon", name
+  
+  @addLife: (lives = 1) ->
+    lives = String lives
+    App.call "cheat", "addLife", lives
+  
+  @myTurn: () ->
+    App.call "cheat", "myTurn"

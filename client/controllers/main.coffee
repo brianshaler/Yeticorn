@@ -13,13 +13,10 @@ root = @
 
 class @App
   constructor: ->
-    Session.set "visible", false
-    
     @game = new GameController()
     
     Meteor.startup =>
       root.viewport = new Viewporter "outer-container"
-      #Session.set "visible", true
       Deps.autorun =>
         lastUpdate = Session.set "lastUpdate", Date.now()
   
@@ -31,8 +28,16 @@ class @App
     args.unshift method
     Meteor.call.apply Meteor.call, args
   
-  @alert: (str) =>
-    alert "Hey! #{str}"
+  @error: (str) =>
+    App.alert "Error", str
+  
+  @alert: (title = "", str = "") =>
+    if str == ""
+      str = title
+      title = false
+    #alert "Hey! #{str}"
+    Session.set "alert", str
+    Session.set "alertTitle", title
   
   @getEnergy: (energyRequired, cb) =>
     app.game.energyCallback = cb
@@ -58,9 +63,6 @@ class @App
 
 app = @app = new @App()
 
-Template.root.visible = =>
-  Session.get "visible"
-
 Template.page.gameList = =>
   games = Games.find(
     {$and: [
@@ -73,6 +75,9 @@ Template.page.gameList = =>
 
 Template.page.showGame = ->
   Session.get "showGame"
+
+Template.page.gameLoading = ->
+  Session.get "gameLoading"
 
 Template.page.error = ->
   Session.get "createError"

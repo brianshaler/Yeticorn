@@ -12,6 +12,11 @@ class @CrystalsHelper
       stacks[stack] = []
     stacks
   
+  @totalCrystalCards: (stacks) ->
+    _.reduce stacks, (memo, stack) ->
+      memo + stack.length
+    , 0
+  
   toObject: ->
     obj = []
     for prop in @props

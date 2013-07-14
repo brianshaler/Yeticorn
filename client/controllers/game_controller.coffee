@@ -20,6 +20,7 @@ class @GameController
     Meteor.autosubscribe =>
       Meteor.subscribe "game", @gameId() if @gameId()
       Meteor.subscribe "crystals", @gameId() if @gameId()
+      Meteor.subscribe "unread_messages", @gameId() if @gameId()
     
     Deps.autorun =>
       lastUpdate = Session.set "lastUpdate", Date.now()
@@ -43,7 +44,9 @@ class @GameController
       displayName this
     
     Template.game.showOverlay = =>
+      Template.game.message() or
       Template.game.underAttack() or
+      Template.game.tradeWithGypsy() or
       Template.game.waitingForDefense() or
       Template.game.confirmPlayingWeapon() or
       Template.game.confirmPlayingSpell() or
@@ -52,19 +55,26 @@ class @GameController
       Template.game.selectCardsFromHand() or
       Template.game.showMyInfo()
     
+    Template.game.message = =>
+      if Session.get "alert"
+        messageTitle: Session.get("alertTitle"), message: Session.get "alert"
+      else
+        Messages.findOne
+          recipient: Meteor.userId()
+          gameId: @gameId()
+          read: false
+    
     Template.game.underAttack = =>
       lastUpdate = Session.get "lastUpdate"
-      if @game?.attack?.defender == Meteor.userId()
-        true
-      else
-        false
+      @game?.attack?.defender == Meteor.userId()
+    
+    Template.game.tradeWithGypsy = =>
+      lastUpdate = Session.get "lastUpdate"
+      @game?.tradeWithGypsy && @myTurn()
     
     Template.game.waitingForDefense = =>
       lastUpdate = Session.get "lastUpdate"
-      if @game?.attack
-        true
-      else
-        false
+      @game?.attack
     
     Template.game.confirmPlayingWeapon = =>
       Session.get "confirmPlayingWeapon"
@@ -84,6 +94,15 @@ class @GameController
     
     Template.game.selectCardsFromHand = =>
       Session.get "selectCardsFromHand"
+    
+    Template.message.events
+      "click .dismiss": (event) =>
+        message = Template.game.message()
+        if Session.get "alert"
+          Session.set "alert", false
+          Session.set "alertTitle", false
+        else
+          App.call "dismissMessage", message._id
     
     Template.players.players = @getPlayers
     Template.players.displayName = () ->
@@ -115,10 +134,6 @@ class @GameController
         player.life = @game.life[player._id]
       players
     
-    Template.select_opponents.opponentList = =>
-      _.filter Template.status_bar.players(), (player) =>
-        player._id != Meteor.userId()
-    
     Template.status_bar.isMyTurn = =>
       @game.currentTurnId == Meteor.userId()
     
@@ -149,6 +164,10 @@ class @GameController
         $("body")
           .addClass("view-crystals")
           .removeClass("view-map view-hand")
+    
+    Template.select_opponents.opponentList = =>
+      _.filter Template.status_bar.players(), (player) =>
+        player._id != Meteor.userId()
     
     Template.defense.availableCrystals = =>
       stacks = []
@@ -245,7 +264,7 @@ class @GameController
         spendingCrystals = Session.get "spendingCrystals"
         App.call "spendCrystals", spendingCrystals, (err, data) ->
           if err?.reason
-            return App.alert err.reason
+            return App.error err.reason
           Session.set "spendingCrystals", [0,0,0,0,0,0]
           App.gotEnergy true
       "click .reset-button": =>
@@ -253,6 +272,23 @@ class @GameController
       "click .cancel": =>
         App.gotEnergy null, true
         Session.set "spendingCrystals", [0,0,0,0,0,0]
+    
+    Template.trade.cards = =>
+      totalCrystals = Template.trade.totalCrystalCards()
+      _.map @game.gypsyCards, (card) ->
+        card.enoughCrystals = card.playCost <= totalCrystals
+        card
+    
+    Template.trade.totalCrystalCards = =>
+      crystals = Crystals.findOne
+        gameId: Session.get "gameId"
+        owner: Meteor.userId()
+      CrystalsHelper.totalCrystalCards crystals.stacks
+    
+    Template.trade.events
+      "click .trade-card": (event) =>
+        code = $(event.target).attr "data-code"
+        App.call "tradeWithGypsy", code
     
     Template.wait_for_defense.stuff = =>
       true
@@ -262,24 +298,25 @@ class @GameController
         redrawOverlay()
   
   loadGame: (id) =>
-    # access parameters in order a function args too
-    Meteor.subscribe "game", id, (err) =>
-      #console.log "found..?"
-      Session.set id, true
-      game = Games.findOne id
-      if game
-        #console.log "Showing game."
-        Session.set "gameId", id
-        Session.set "showGame", true
-        Session.set "createError", null
-      else
-        #console.log "Okay, no game."
-        x = "do something else"
-        Session.set "gameId", null
-        Session.set "showGame", false
-        Session.set "createError", "Game not found"
-      Session.set "visible", true
-    cnt = Games.find(_id: id).count()
+    Session.set "gameLoading", true
+    setTimeout () =>
+      # access parameters in order a function args too
+      handle = Meteor.subscribe "game", id, (err) =>
+        #console.log "found..?"
+        Session.set id, true
+        game = Games.findOne id
+        if game
+          #console.log "Showing game."
+          Session.set "gameId", id
+          Session.set "showGame", true
+          Session.set "createError", null
+        else
+          #console.log "Okay, no game."
+          Session.set "gameId", null
+          Session.set "showGame", false
+          Session.set "createError", "Game not found"
+        Session.set "gameLoading", false
+    , 1000
   
   gameId: ->
     Session.get "gameId"

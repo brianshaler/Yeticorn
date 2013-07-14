@@ -20,30 +20,38 @@
     {{#if showOverlay}}
     <div class="overlay">
       <div class="overlay-popup">
-        {{#if underAttack}}
-          {{> defense}}
+        {{#if message}}
+          {{#with message}}{{> message}}{{/with}}
         {{else}}
-          {{#if waitingForDefense}}
-            {{> wait_for_defense}}
+          {{#if underAttack}}
+            {{> defense}}
+          {{else}}
+            {{#if waitingForDefense}}
+              {{> wait_for_defense}}
+            {{/if}}
           {{/if}}
-        {{/if}}
-        {{#if confirmPlayingWeapon}}
-          {{> confirm_playing_weapon}}
-        {{/if}}
-        {{#if confirmPlayingSpell}}
-          {{> confirm_playing_spell}}
-        {{/if}}
-        {{#if energyRequired}}
-          {{> energy_required}}
-        {{/if}}
-        {{#if selectOpponents}}
-          {{> select_opponents}}
-        {{/if}}
-        {{#if selectCardsFromHand}}
-          {{> select_cards_from_hand}}
-        {{/if}}
-        {{#if showMyInfo}}
-          {{> my_info}}
+          {{#if confirmPlayingWeapon}}
+            {{> confirm_playing_weapon}}
+          {{/if}}
+          {{#if confirmPlayingSpell}}
+            {{> confirm_playing_spell}}
+          {{/if}}
+          {{#if energyRequired}}
+            {{> energy_required}}
+          {{else}}
+            {{#if tradeWithGypsy}}
+              {{> trade}}
+            {{/if}}
+          {{/if}}
+          {{#if selectOpponents}}
+            {{> select_opponents}}
+          {{/if}}
+          {{#if selectCardsFromHand}}
+            {{> select_cards_from_hand}}
+          {{/if}}
+          {{#if showMyInfo}}
+            {{> my_info}}
+          {{/if}}
         {{/if}}
       </div>
     </div>

@@ -59,3 +59,16 @@ Meteor.publish "crystals", (gameId) ->
   check gameId, String
   Crystals.find
     gameId: gameId
+
+Meteor.publish "unread_messages", (gameId) ->
+  check gameId, String
+  q = 
+    recipient: @userId
+    gameId: gameId
+    read: false
+  params =
+    sort:
+      createdDate: -1
+    limit: 10
+  Messages.find q, params
+  

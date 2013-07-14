@@ -1,0 +1,21 @@
+<template name="trade">
+  <h3>Trade with gypsy?</h3>
+  <p>
+    {{totalCrystalCards}}
+    Any Crystal cards you trade will be removed from play. The card you trade for will go to your hand. The gypsy doesn't care whether or not the Crystals are charged up.
+  </p>
+  {{#each cards}}
+    <div style="float: left; padding-right: 1em;">
+      <p style="font-size: 0.5em;">{{> card}}</p>
+      <p>
+        <strong>{{name}}</strong><br />
+        Cost: {{playCost}} Crystals
+      </p>
+      <input type="button" class="btn btn-danger trade-card" value="Trade" data-code="{{code}}" {{#unless enoughCrystals}}disabled{{/unless}} />
+    </div>
+  {{/each}}
+  <div style="clear: both;"></div>
+  <p class="align-right">
+    <input type="button" class="btn done" value="Done trading" />
+  </p>
+</template>

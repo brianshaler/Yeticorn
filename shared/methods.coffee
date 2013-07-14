@@ -12,6 +12,9 @@ getGame = (gameId, userId, duringAnyTurn = false) ->
     throw new Meteor.Error 403, "Game isn't ready. There must be at least 2 players"
   game
 
+getPlayer = (_id) ->
+  Meteor.users.findOne _id
+
 Meteor.methods
   createGame: (options) ->
     check options, {public: Match.Optional Boolean}
@@ -148,7 +151,7 @@ Meteor.methods
     if !destTile
       throw new Meteor.Error 404, "I don't see the requested column on the board.."
     
-    dist = Gameplay.getStepsToTile myTile, destTile
+    dist = BoardHelper.getStepsToTile myTile, destTile
     energyToMove = Gameplay.energyRequiredToMove dist
     if game.currentTurnEnergy < energyToMove
       throw new Meteor.Error 403, ErrorHelper.ENERGY_REQUIRED
@@ -162,10 +165,13 @@ Meteor.methods
       game.movesThisTurn = 0
     game.movesThisTurn++
     
+    game.tradeWithGypsy = destTile.gypsy == true
+    
     Games.update _id: gameId,
       $set:
         currentTurnEnergy: game.currentTurnEnergy
         movesThisTurn: game.movesThisTurn
+        tradeWithGypsy: game.tradeWithGypsy
     Boards.update gameId: gameId,
       $set:
         tiles: board.tiles
@@ -195,9 +201,9 @@ Meteor.methods
       console.log "No weapon for #{@userId} on tile #{column}x#{row}, so using fists instead"
       weapon = WeaponHelper.fists()
     
-    dist = Gameplay.getStepsToTile myTile, destTile
+    dist = BoardHelper.getStepsToTile myTile, destTile
     if dist > weapon.range
-      throw new Meteor.Error 403, "You must be in an adjacent tile to attack"
+      throw new Meteor.Error 403, "You are not close enough to attack"
     
     if game.currentTurnEnergy < energy or energy < weapon.useCost
       throw new Meteor.Error 403, "Not enough energy!"
@@ -249,13 +255,88 @@ Meteor.methods
     game.life[@userId] = 0 if game.life[@userId] < 0
     game.attack = false
     
+    livingPlayers = Gameplay.livingPlayers game
+    if livingPlayers.length < 2
+      if livingPlayers.length == 1
+        game.winner = livingPlayers[0]
+        MessageHelper.toAll gameId, Gameplay.declareWinner(getPlayer(livingPlayers[0]))
+      else
+        MessageHelper.toAll gameId, Gameplay.declareWinner()
+      game.currentTurnId = false
     Games.update _id: gameId,
       $set:
         life: game.life
         attack: game.attack
+        currentTurnId: game.currentTurnId
+        winner: game.winner
     Crystals.update _id: crystals._id,
       $set:
         stacks: crystals.stacks
+  tradeWithGypsy: (gameId, code) ->
+    check gameId, String
+    check code, String
+    
+    game = getGame gameId, @userId
+    
+    unless game.currentTurnId == @userId
+      throw new Meteor.Error 403, "Can't trade when it's not your turn"
+    
+    unless game.tradeWithGypsy
+      throw new Meteor.Error 403, "Can't trade with the gypsy right now"
+    
+    hand = Hands.findOne
+      gameId: gameId
+      owner: @userId
+    crystals = Crystals.findOne
+      gameId: gameId
+      owner: @userId
+    
+    card = _.find game.gypsyCards, (gc) -> gc.code == code
+    
+    unless card
+      throw new Meteor.Error 403, "Invalid code"
+    
+    totalCrystalCards = CrystalsHelper.totalCrystalCards crystals.stacks
+    
+    if totalCrystalCards < card.playCost
+      throw new Meteor.Error 403, "You can't afford this"
+    
+    taken = 0
+    for stack in [0..5]
+      while taken < card.playCost and crystals.stacks[stack].length > 0
+        crystals.stacks[stack].pop()
+        taken++
+    
+    if taken != card.playCost
+      throw new Meteor.Error 403, "Had trouble taking #{card.playCost} crystals.."
+    
+    hand.cards.push card
+    
+    game.gypsyCards = []
+    game.tradeWithGypsy = false
+    
+    Games.update _id: gameId,
+      $set:
+        gypsyCards: game.gypsyCards
+        tradeWithGypsy: game.tradeWithGypsy
+    Crystals.update _id: crystals._id,
+      $set:
+        stacks: crystals.stacks
+    Hands.update _id: hand._id,
+      $set:
+        cards: hand.cards
+  dismissMessage: (gameId, messageId) ->
+    check gameId, String
+    check messageId, String
+    
+    message = Messages.findOne
+      _id: messageId
+      recipient: @userId
+    
+    if message
+      Messages.update _id: messageId,
+        $set:
+          read: true
   cheat: (gameId, action, val1 = "", val2 = "") ->
     check gameId, String
     check action, String
@@ -291,7 +372,16 @@ Meteor.methods
       return Hands.update _id: hand._id,
         $set:
           cards: hand.cards
-
+    if action == "addLife"
+      game.life[@userId] += parseInt val1
+      Games.update _id: gameId,
+        $set:
+          life: game.life
+    if action == "myTurn"
+      game.currentTurnId = @userId
+      Games.update _id: gameId,
+        $set:
+          currentTurnId: game.currentTurnId
 
 @displayName = (user) ->
   if user.profile and user.profile.name
