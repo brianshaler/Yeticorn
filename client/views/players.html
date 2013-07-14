@@ -1,19 +1,37 @@
 <template name="players">
-  Waiting for players..
-  {{#each players}}
-    <div>
-      Player {{id}}: {{displayName}}
+  <div class="player-setup">
+    <h1>Yeticorn</h1>
+    <div class="game-url big-input"><input type="text" value="{{gameUrl}}" /></div>
+    <div class="players">
+      <div class="preview-container">
+      {{#each players}}
+        <div class="player-preview player{{id}}">
+          <div class="top">&nbsp;</div>
+          <div class="img-holder"><img src="/images/character/{{character}}_preview.png" /></div>
+          <span class="{{character}}">{{displayName}}</span>
+          <div class="bottom">&nbsp;</div>
+        </div>
+      {{/each}}
+      {{#each placeholders}}
+        <div class="player-preview player{{id}}">
+          <div class="top">&nbsp;</div>
+          <div class="img-holder"><img src="/images/character/preview_noplayer.png" /></div>
+          <span class="noplayer"><small>waiting for</small><br />player {{id}}</span>
+          <div class="bottom">&nbsp;</div>
+        </div>
+      {{/each}}
     </div>
-  {{/each}}
-  
-  {{#if currentUser}}
-    {{#if canStart}}
-      <input type="button" value="Start" class="btn btn-small start-game" />
+    </div>
+    
+    {{#if currentUser}}
+      {{#if isOwner}}
+        <input type="button" value="Start" class="btn btn-small start-game" {{#unless canStart}}disabled{{/unless}} />
+      {{/if}}
+      {{#if canJoin}}
+        <input type="button" value="Join" class="btn btn-small join-game" />
+      {{/if}}
+    {{else}}
+    <div>Log in to join!</div>
     {{/if}}
-    {{#if canJoin}}
-      <input type="button" value="Join" class="btn btn-small join-game" />
-    {{/if}}
-  {{else}}
-  <div>Log in to join!</div>
-  {{/if}}
+  </div>
 </template>

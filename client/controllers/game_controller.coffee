@@ -20,7 +20,7 @@ class @GameController
     Meteor.autosubscribe =>
       Meteor.subscribe "game", @gameId() if @gameId()
       Meteor.subscribe "crystals", @gameId() if @gameId()
-      Meteor.subscribe "unread_messages", @gameId() if @gameId()
+      Meteor.subscribe "unreadMessages", @gameId() if @gameId()
     
     Deps.autorun =>
       lastUpdate = Session.set "lastUpdate", Date.now()
@@ -108,9 +108,27 @@ class @GameController
         else
           App.call "dismissMessage", message._id
     
+    Template.players.gameUrl = =>
+      Meteor.Router.gamePageUrl Session.get "gameId"
+    
     Template.players.players = @getPlayers
+    Template.players.placeholders = =>
+      p = Template.players.players()
+      placeholders = []
+      id = 0
+      for i in [0..4]
+        if !p[i]
+          placeholders.push
+            id: i+1
+      placeholders
+    
     Template.players.displayName = () ->
       displayName this
+    
+    Template.players.isOwner = () =>
+      lastUpdate = Session.get "lastUpdate"
+      return false if !@game?
+      @game.owner == Meteor.userId()
     
     Template.players.canStart = () =>
       lastUpdate = Session.get "lastUpdate"
@@ -351,6 +369,7 @@ class @GameController
     players = _.map @game.players, (playerId) =>
       p = @playerById playerId
       p.id = id++
+      p.character = @game.characters[playerId]
       p.avatar = "/images/character/#{@game.characters[playerId]}1.png"
       p.crystals = Crystals.findOne gameId: @game._id, owner: playerId
       p.stacks = []

@@ -1,6 +1,7 @@
 <head>
   <title>Yeticorn</title>
   <meta name="viewport" content="width=600">
+  <link href="http://fonts.googleapis.com/css?family=Bevan" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -31,14 +32,6 @@
       {{/each}}
     </div>
   {{/if}}
-  <div style="float: right;">
-    <a href="/">Home</a>
-    {{#if currentUser}}<a href="/" class="logout">logout</a>{{/if}}
-  </div>
-  
-  {{#unless currentUser}}
-    {{> signup}}
-  {{/unless}}
   
   {{#if gameLoading}}
     {{> loading}}
@@ -47,34 +40,56 @@
       {{> game}}
     {{else}}
       {{#if currentUser}}
-        <h4>Start New Game</h4>
-        <input type="button" value="New Game" class="btn btn-small create-game" />
-        <h4>Games waiting for opponents:</h4>
-        {{#unless gameList}}None found.. I guess you should start one!{{/unless}}
-        {{#each gameList}}
-          <div>
-            <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
+        <div class="start-page big-input">
+          <div class="start-page-content"style=";">
+            <h1>Start New Game</h1>
+            <div class="start-buttons">
+              <input type="button" class="btn btn-large btn-primary create-public-game" value="Public" />
+              <input type="button" class="btn btn-large btn-primary create-private-game" value="Invite-only" />
+            </div>
+            <div class="clear"></div>
+            {{#if anyGames}}
+            <div class="start-page-columns">
+              <h3>My Games</h3>
+              {{#unless myGames}}You're not in any games. Start one!{{else}}GAMES!{{/unless}}
+              {{#each myGames}}
+                <div>
+                  <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
+                </div>
+              {{/each}}
+            </div>
+            <div class="start-page-columns">
+              <h3>Games waiting for opponents:</h3>
+              {{#unless gameList}}No available games found.{{/unless}}
+              {{#each gameList}}
+                <div>
+                  <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
+                </div>
+              {{/each}}
+            </div>
+            {{/if}}
           </div>
-        {{/each}}
+        </div>
+      {{else}}
+        {{> signup}}
       {{/if}}
     {{/if}}
   {{/if}}
 </template>
 
 <template name="signup">
-  <form class="signup-form alert">
-    <h4>You must be logged in to play</h4>
-    <div>(use some dumb password like 'asdf'; nobody cares)</div>
-    <p>
-      User name:
-      <input type="text" class="username" name="username" value="{{username}}" />
-    </p>
-    <p>
-      Password:
-      <input type="password" class="password" name="password" />
-    </p>
-    <input type="submit" class="btn btn-large" value="Sign up" />
-  </form>
+  <div class="signup">
+    <form class="signup-form">
+      <h1>Yeticorn</h1>
+      <p>
+        <input type="text" class="username" name="username" placeholder="Enter Name" value="{{username}}" />
+      </p>
+      <p>
+        <input type="password" class="password" placeholder="Password" name="password" />
+      </p>
+      <input type="submit" class="btn btn-large btn-primary" value="Start" />
+    </form>
+  </div>
 </template>
 
 <template name="loading">

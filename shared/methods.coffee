@@ -19,7 +19,7 @@ Meteor.methods
   createGame: (options) ->
     check options, {public: Match.Optional Boolean}
     
-    options.public = true
+    pub = if options.public then true else false
     characters = {}
     characters[@userId] = CharacterHelper.getRandomCharacter()
     
@@ -27,7 +27,7 @@ Meteor.methods
       throw new Meteor.Error 403, "You must be logged in"
     Games.insert
       owner: @userId
-      public: true
+      public: pub
       started: false
       createdDate: Date.now()
       players: [@userId]

@@ -10,11 +10,17 @@ global-reset()
   box-sizing: border-box
 
 body
-  background: #fff
+  background: #f3f3f3
   font-family: sans-serif
+  color: #333
 
+h1, h2, h3
+  font-family: "Bevan"
+  color: #069
+  line-height: 1.2em
 h1
   font-size: 3em
+  text-align: center
 h2
   font-size: 2.3em
 h3
@@ -29,37 +35,33 @@ p
   text-align: right
 
 
-header
-    background-color: #999
-    padding: 15px
-  h1
-    font-size: 24pt
-    text-align: center
-    color: #fff
-
-.setup
-  form
-    max-width: 400px
-    margin-left: auto
-    margin-right: auto
-    margin-top: 20px
-    text-align: center
-    input
-      text-transform: uppercase
-      margin-top: 12px
-      width: 50%
-    input[type=text]
-      text-align: center
-  p
-    margin-top: 12px
-    color: #999
-    font-size: 16pt
-
 .outer-container
   //position: absolute
   width: 100%
   max-width: 100%
   overflow: hidden
+
+.start-page
+  text-align: center
+  h1
+    margin: 1em 0 0.4em
+  h3
+    font-size: 1.4em
+  .start-page-content
+    margin: 0 auto
+    width: 85%
+    text-align: left
+  .start-buttons
+    text-align: center
+    padding-bottom: 1.4em
+    input
+      margin: 0 0.4em
+@media (min-width: 768px)
+  .start-page
+    .start-page-columns
+      float: left
+      width: 50%
+
 
 @media (max-width: 767px)
   input
@@ -67,6 +69,35 @@ header
     padding: 0.5em 0.9em !important
 
 
+
+.big-input
+  input[type=text], input[type=password]
+    border: solid 0.15em #ccc
+    padding: 0.4em
+    line-height: 1.3em
+    border-radius: 1em
+    height: 2em
+    width: 10em
+    font-size: 1.8em
+    text-align: center
+    background-color: #f1f1f1
+    color: #069
+  ::-webkit-input-placeholder /* WebKit browsers */
+    color: #069
+    font-weight: bold
+    text-align: center
+  :-moz-placeholder /* Mozilla Firefox 4 to 18 */
+    color: #069
+    font-weight: bold
+    text-align: center
+  ::-moz-placeholder /* Mozilla Firefox 19+ */
+    color: #069
+    font-weight: bold
+    text-align: center
+  :-ms-input-placeholder /* Internet Explorer 10+ */
+    color: #069
+    font-weight: bold
+    text-align: center
 
 
 

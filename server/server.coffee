@@ -13,6 +13,17 @@ Meteor.publish "games", () ->
       limit: 10
     }
 
+Meteor.publish "myGames", () ->
+  where =
+    $or:
+      owner: @userId
+      players: @userId
+  params =
+    sort:
+      createdDate: -1
+    limit: 10
+  Games.find where, params
+
 Meteor.publish "recentGames", () ->
   q = [{public: true}]
   if this.userId
@@ -36,7 +47,7 @@ Meteor.publish "game", (gameId) ->
     q.push owner: this.userId
   Games.find
     _id: gameId
-    $or: q
+    #$or: q
 
 Meteor.publish "players", () ->
   Meteor.users.find
@@ -60,7 +71,7 @@ Meteor.publish "crystals", (gameId) ->
   Crystals.find
     gameId: gameId
 
-Meteor.publish "unread_messages", (gameId) ->
+Meteor.publish "unreadMessages", (gameId) ->
   check gameId, String
   q = 
     recipient: @userId

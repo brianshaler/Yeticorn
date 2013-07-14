@@ -1,10 +1,12 @@
 Meteor.subscribe "players"
-Meteor.subscribe "games"
 Meteor.subscribe "recentGames"
+Meteor.subscribe "myGames"
 
 window.addEventListener "viewportchanged", (v) ->
-  $(".game-page").css
-    height: v.height - $(".game-page").offset().top
+  pg = $(".game-page")
+  if pg?.length == 1
+    pg.css
+      height: v.height - pg.offset().top
 
 app = null
 root = @
@@ -63,6 +65,13 @@ class @App
 
 app = @app = new @App()
 
+Template.page.anyGames = =>
+  Template.page.myGames().length > 0 or Template.page.gameList().length > 0
+
+Template.page.myGames = =>
+  games = Games.find(players: Meteor.userId()).fetch()
+  app.addPlayerInfo games
+
 Template.page.gameList = =>
   games = Games.find(
     {$and: [
@@ -99,9 +108,15 @@ Template.page.events
     if gameId.length > 0
       App.call "addPlayer"
       Meteor.Router.to "/game/#{gameId}"
-  "click .create-game": =>
+  "click .create-public-game": =>
     Meteor.call "createGame", 
       public: true
+    , (error, gameId) =>
+      if !error and gameId
+        Meteor.Router.to "/game/#{gameId}"
+  "click .create-private-game": =>
+    Meteor.call "createGame", 
+      public: false
     , (error, gameId) =>
       if !error and gameId
         Meteor.Router.to "/game/#{gameId}"
@@ -110,7 +125,7 @@ Template.page.events
     obj = {}
     try
       obj.username = template.find(".username").value
-      if !(obj.username.length >= 4) or !obj.username.match(/^[a-z0-9_]+$/gi)
+      if !(obj.username.length >= 4) or !obj.username.match(/^[a-z0-9_]+ ?[a-z0-9_]+$/gi)
         throw new Error "User name not valid"
       obj.password = template.find(".password").value
       obj.profile = {name: obj.username}

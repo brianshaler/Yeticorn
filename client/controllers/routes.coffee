@@ -10,13 +10,17 @@
         return page
   Meteor.Router.filter "checkLoggedIn"
   
+  Meteor.Router.beforeRouting = () ->
+    "stuff to do before routing.."
+  
   Meteor.Router.add
-    "/game/:id": (id) ->
-      app.game.loadGame id
-      "page"
+    "/game/:id":
+      as: "gamePage"
+      to: (id) ->
+        app.game.loadGame id
+        "page"
     "/": ->
       Session.set "gameId", null
       Session.set "showGame", false
-      Session.set "createError", null
       "page"
     "*": "not_found"
