@@ -52,7 +52,7 @@
             {{#if anyGames}}
             <div class="start-page-columns">
               <h3>My Games</h3>
-              {{#unless myGames}}You're not in any games. Start one!{{else}}GAMES!{{/unless}}
+              {{#unless myGames}}You're not in any games. Start one!{{/unless}}
               {{#each myGames}}
                 <div>
                   <input type="button" id="{{_id}}" class="btn btn-small join-button join-{{_id}}" value="{{ownerName}}" />
