@@ -303,24 +303,22 @@ class @GameController
   
   loadGame: (id) =>
     Session.set "gameLoading", true
-    setTimeout () =>
-      # access parameters in order a function args too
-      handle = Meteor.subscribe "game", id, (err) =>
-        #console.log "found..?"
-        Session.set id, true
-        game = Games.findOne id
-        if game
-          #console.log "Showing game."
-          Session.set "gameId", id
-          Session.set "showGame", true
-          Session.set "createError", null
-        else
-          #console.log "Okay, no game."
-          Session.set "gameId", null
-          Session.set "showGame", false
-          Session.set "createError", "Game not found"
-        Session.set "gameLoading", false
-    , 1000
+    # access parameters in order a function args too
+    handle = Meteor.subscribe "game", id, (err) =>
+      #console.log "found..?"
+      Session.set id, true
+      game = Games.findOne id
+      if game
+        #console.log "Showing game."
+        Session.set "gameId", id
+        Session.set "showGame", true
+        Session.set "createError", null
+      else
+        #console.log "Okay, no game."
+        Session.set "gameId", null
+        Session.set "showGame", false
+        Session.set "createError", "Game not found"
+      Session.set "gameLoading", false
   
   gameId: ->
     Session.get "gameId"
