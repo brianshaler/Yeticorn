@@ -288,8 +288,8 @@ class @Viewporter
         @element.style.display = "block"
       , 100
     
-    if body?.getAttribute?
-      classString = body.getAttribute("class") or ""
+    if body?[0]?.getAttribute?
+      classString = body?[0]?.getAttribute("class") or ""
       classes = classString.split " "
       newClasses = []
     
@@ -301,7 +301,7 @@ class @Viewporter
         newClasses.push "landscape-mode"
       else
         newClasses.push "portrait-mode"
-      body.setAttribute "class", newClasses.join(" ")
+      body?[0]?.setAttribute "class", newClasses.join(" ")
     
     #@trace viewportContent, 2
     

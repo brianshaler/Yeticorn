@@ -4,7 +4,7 @@ Meteor.subscribe "recentGames"
 
 window.addEventListener "viewportchanged", (v) ->
   $(".game-page").css
-    height: v.height
+    height: v.height - $(".game-page").offset().top
 
 app = null
 root = @
@@ -16,7 +16,7 @@ class @App
     @game = new GameController()
     
     Meteor.startup =>
-      root.viewport = new Viewporter "outer-container"
+      root.viewport = new Viewporter "outer-container", fullHeightPortrait: false
       Deps.autorun =>
         lastUpdate = Session.set "lastUpdate", Date.now()
   

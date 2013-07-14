@@ -93,10 +93,9 @@ class @BoardController
   
   render: () =>
     return if !@board?.tiles? or !@game?
-    h = window.viewporter.viewportHeight - $(".status-bar").height()
+    h = window.viewporter.viewportHeight - $(".map-holder").offset().top
+    
     w = $(".map-holder").width()
-    $(".map-holder").css
-      height: h
     pos = {}
     _.each @board.tiles, (tile) =>
       tileId = "tile-#{tile.row}x#{tile.column}"
@@ -138,6 +137,8 @@ class @BoardController
       TileHelper.drawTile tile, canvas[0]
       #el.append($("<img src=\"/images/tile_bg.png\" width=\"#{Tile::width * pos.scale}px\" height=\"#{Tile::height * pos.scale}px\" />"))
     bw = TileHelper.boardWidth @board.columns, pos.scale
+    $(".map-holder").css
+      height: TileHelper.boardHeight @board.rows, pos.scale
     if bw < w
       $(".game-map").css
         position: "absolute"

@@ -4,18 +4,22 @@
       {{> status_bar}}
     </div>
     <div class="game-page">
+      {{#unless spectator}}
+      <div class="crystals-holder">
+        {{> crystals}}
+      </div>
+      {{/unless}}
       <div class="map-holder">
           {{> map}}
         <div class="game-board map-overlay" id="map-overlay">
           {{> overlay}}
         </div>
       </div>
-      <div class="crystals-holder">
-        {{> crystals}}
-      </div>
+      {{#unless spectator}}
       <div class="hand-holder">
         {{> hand}}
       </div>
+      {{/unless}}
     </div>
     {{#if showOverlay}}
     <div class="overlay">

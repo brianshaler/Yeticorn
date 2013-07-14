@@ -11,7 +11,7 @@ class @GameController
     Session.set "defendingCrystals", [0,0,0,0,0,0]
     
     $(document).ready () ->
-      $("body").addClass("view-hand")
+      $("body").addClass("view-map")
     
     window.game = @
     window.addEventListener "viewportchanged", (v) =>
@@ -38,6 +38,10 @@ class @GameController
     Template.game.gameId = @gameId
     Template.game.game = @getGame
     Template.game.myGame = @myGame
+    Template.game.spectator =
+    Template.status_bar.spectator = =>
+      lastUpdate = Session.get "lastUpdate"
+      @game.owner != Meteor.userId() and -1 == @game.players.indexOf Meteor.userId()
     Template.game.currentView = ->
       Session.get "currentView"
     Template.game.displayName = () ->
