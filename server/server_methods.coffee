@@ -40,10 +40,13 @@ Meteor.methods
         owner: game.players[i]
         gameId: gameId
         cards: handCards[i]
+      stacks = [[],[],[],[],[],[]]
+      for [1..3]
+        stacks[1].push Cards.getCrystal()
       crystalsId = Crystals.insert
         owner: game.players[i]
         gameId: gameId
-        stacks: [[],[],[],[],[],[]]
+        stacks: stacks
       handIds.push handId
       crystalsIds.push crystalsId
     

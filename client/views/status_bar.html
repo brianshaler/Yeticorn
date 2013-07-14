@@ -1,9 +1,11 @@
 <template name="status_bar">
   {{#unless spectator}}
-  <div><input type="button" value="End Turn" class="btn btn-small end-turn" {{#unless isMyTurn}}disabled{{/unless}}/></div>
-  <input type="button" value="View Map" class="btn btn-small view-btn view-map-btn" />
-  <input type="button" value="View Hand" class="btn btn-small view-btn view-hand-btn" />
-  <input type="button" value="View Crystals" class="btn btn-small view-btn view-crystals-btn" />
+    {{#if isMyTurn}}
+      <div><input type="button" value="End Turn" class="btn btn-small end-turn" /></div>
+    {{/if}}
+    <input type="button" value="View Map" class="btn btn-small view-btn view-map-btn" />
+    <input type="button" value="View Hand" class="btn btn-small view-btn view-hand-btn" />
+    <input type="button" value="View Crystals" class="btn btn-small view-btn view-crystals-btn" />
   {{/unless}}
   {{#if isMyTurn}}
     ENERGY: {{currentTurnEnergy}} / {{totalAvailableEnergy}}
