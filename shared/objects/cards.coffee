@@ -22,7 +22,6 @@ class @Cards
         s.code == code
     if !spell
       spell = @spells[Math.floor Math.random()*@spells.length]
-    console.log spell if !spell.toObject
     spell.toObject()
   
   @getCrystal: ->
@@ -41,6 +40,7 @@ class @Card
     @useCost = 0
     
     @fromObject obj
+    @code = Card.toCode @name
   
   @toCode: (name = "") ->
     name.toLowerCase().replace /[^A-Z^a-z^0-9]/g, "_"

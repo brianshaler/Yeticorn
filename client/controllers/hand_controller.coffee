@@ -223,10 +223,11 @@ class @HandController
             if err.reason == ErrorHelper.ENERGY_REQUIRED
               App.getEnergy card.playCost, (retry, cancel) =>
                 if retry and canRetry
-                  @playCard cardIndex, toArea, options, false
+                  return @playCard cardIndex, toArea, options, false
                 else
                   "cancel"
                 Session.set "cardIndex", false
+                @cancelSpell()
             else
               App.alert err.reason
               Session.set "cardIndex", false

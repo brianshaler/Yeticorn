@@ -143,15 +143,18 @@ Meteor.methods
             gameId: gameId
             owner: playerId
           
-          for i in [1..opponentRandomCard]
-            if _hand.cards.length > 0
-              pickMe = Math.floor Math.random()*_hand.cards.length
-              if card.opponentCardTo? == "hand"
-                hand.cards.push _hand.cards[pickMe]
-              _hand.cards.splice pickMe, 1
-          Hands.update _id: _hand._id,
-            $set:
-              cards: _hand.cards
+          if _hand.cards.length == 0
+            MessageHelper.sendMessage gameId, @userId, "Can't steal from an empty hand!"
+          else
+            for i in [1..card.opponentRandomCard]
+              if _hand.cards.length > 0
+                pickMe = Math.floor Math.random()*_hand.cards.length
+                if card.opponentCardTo and String(card.opponentCardTo) == "hand"
+                  hand.cards.push _hand.cards[pickMe]
+                _hand.cards.splice pickMe, 1
+            Hands.update _id: _hand._id,
+              $set:
+                cards: _hand.cards
       if card.takeWeapon? == true
         _.each options.opponents, (playerId) =>
           if game.weapons[playerId]
