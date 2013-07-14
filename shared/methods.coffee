@@ -8,8 +8,6 @@ getGame = (gameId, userId, duringAnyTurn = false) ->
     throw new Meteor.Error 404, "No such game"
   if game.currentTurnId != userId and !duringAnyTurn
     throw new Meteor.Error 403, "It's not your turn"
-  if game.players.length < 2
-    throw new Meteor.Error 403, "Game isn't ready. There must be at least 2 players"
   game
 
 getPlayer = (_id) ->
@@ -56,23 +54,6 @@ Meteor.methods
     Games.update _id: gameId,
       $set:
         players: game.players
-        characters: game.characters
-  chooseCharacter: (gameId, color) ->
-    check gameId, String
-    check color, String
-    
-    game = getGame gameId, @userId, true
-    
-    if game.started and 1==2
-      throw new Meteor.Error 403, "Can't do this after the game has started!"
-    
-    if CharacterHelper.canChooseCharacter _.unique(game.characters), color
-      game.characters[@userId] = color
-    else
-      throw new Meteor.Error 403, "Not a valid/available color"
-    
-    Games.update _id: gameId,
-      $set:
         characters: game.characters
   playSpell: (gameId, cardIndex, options) ->
     check gameId, String

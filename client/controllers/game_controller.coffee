@@ -108,6 +108,9 @@ class @GameController
         else
           App.call "dismissMessage", message._id
     
+    Template.players.rendered = =>
+      redrawOverlay()
+    
     Template.players.gameUrl = =>
       Meteor.Router.gamePageUrl Session.get "gameId"
     
@@ -146,6 +149,12 @@ class @GameController
       "click .join-game": =>
         console.log "join game!"
         App.call "addPlayer"
+      "click .player-preview img": (event) =>
+        playerId = $(event.target).attr "data-id"
+        if playerId == Meteor.userId()
+          App.call "chooseCharacter", "", (err, data) ->
+            if err?.reason
+              alert "Error" + err.reason
     
     Template.status_bar.players = =>
       players = @getPlayers()
@@ -337,6 +346,12 @@ class @GameController
         Session.set "showGame", false
         Session.set "createError", "Game not found"
       Session.set "gameLoading", false
+    game = Games.findOne id
+    if game
+      Session.set "gameId", id
+      Session.set "showGame", true
+      Session.set "gameLoading", false
+    
   
   gameId: ->
     Session.get "gameId"
@@ -391,7 +406,7 @@ class @GameController
     Meteor.users.findOne _id
 
 redrawOverlay = ->
-  if Template.game.showOverlay()
+  if Template.game.showOverlay() or !@game.started
     viewportWidth = window.viewporter.viewportWidth
     viewportHeight = window.viewporter.viewportHeight
     $(".overlay").css

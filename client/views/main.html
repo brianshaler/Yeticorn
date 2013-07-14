@@ -34,13 +34,14 @@
   {{/if}}
   
   {{#if gameLoading}}
-    {{> loading}}
+    {{> loading}}.....
   {{else}}
     {{#if showGame}}
       {{> game}}
     {{else}}
       {{#if currentUser}}
         <div class="start-page big-input">
+          <a href="/" class="logout" style="float: right;">logout</a>
           <div class="start-page-content"style=";">
             <h1>Start New Game</h1>
             <div class="start-buttons">
@@ -71,6 +72,7 @@
           </div>
         </div>
       {{else}}
+        <h1>Yeticorn</h1>
         {{> signup}}
       {{/if}}
     {{/if}}
@@ -80,7 +82,6 @@
 <template name="signup">
   <div class="signup">
     <form class="signup-form">
-      <h1>Yeticorn</h1>
       <p>
         <input type="text" class="username" name="username" placeholder="Enter Name" value="{{username}}" />
       </p>

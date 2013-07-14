@@ -7,7 +7,7 @@
       {{#each players}}
         <div class="player-preview player{{id}}">
           <div class="top">&nbsp;</div>
-          <div class="img-holder"><img src="/images/character/{{character}}_preview.png" /></div>
+          <div class="img-holder"><img src="/images/character/{{character}}_preview.png" data-id="{{_id}}" /></div>
           <span class="{{character}}">{{displayName}}</span>
           <div class="bottom">&nbsp;</div>
         </div>
@@ -25,13 +25,18 @@
     
     {{#if currentUser}}
       {{#if isOwner}}
-        <input type="button" value="Start" class="btn btn-small start-game" {{#unless canStart}}disabled{{/unless}} />
+        <input type="button" value="Start" class="btn btn-large {{#if canStart}}btn-primary{{/if}} start-game" {{#unless canStart}}disabled{{/unless}} />
       {{/if}}
       {{#if canJoin}}
-        <input type="button" value="Join" class="btn btn-small join-game" />
+        <input type="button" value="Join" class="btn btn-large btn-primary join-game" />
       {{/if}}
     {{else}}
-    <div>Log in to join!</div>
+      <div class="overlay">
+        <div class="overlay-popup signup big-input">
+          <h1>Sign in to play!</h1>
+          {{> signup}}
+        </div>
+      </div>
     {{/if}}
   </div>
 </template>
