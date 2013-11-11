@@ -10,3 +10,8 @@ accounts-base
 accounts-password
 audit-argument-checks
 bootstrap
+standard-app-packages
+crypto-base
+crypto-md5
+page-js-ie-support
+router
