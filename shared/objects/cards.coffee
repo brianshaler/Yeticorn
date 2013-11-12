@@ -179,6 +179,13 @@ Cards.spells.push new Spell
   defensive: true
   multiplyDamage: 0.0
 Cards.spells.push new Spell
+  name: "Peace"
+  filename: "weapons/spork"
+  description: "All players discard Weapon cards that are in play."
+  playCost: 2
+  allPlayers: true
+  takeWeapon: true
+Cards.spells.push new Spell
   name: "Blind Thief"
   filename: "weapons/spork"
   description: "Steal a card at random from selected opponent's hand"
@@ -202,6 +209,7 @@ Cards.spells.push new Spell
   selectWeaponFromMyHand: 1
   myCardTo: "weapon"
   takeWeapon: true
+  takenCardTo: "hand"
 Cards.spells.push new Spell
   name: "Rampage"
   filename: "weapons/spork"

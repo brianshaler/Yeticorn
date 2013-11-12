@@ -240,6 +240,8 @@ class @GameController
         total += i * defendingCrystals[i]
       total
     
+    
+    
     Template.defense.events
       "click .crystals-button": (event) =>
         energy = parseInt $(event.target).attr "data-energy"
@@ -251,6 +253,15 @@ class @GameController
         App.call "defend", Session.get "defendingCrystals"
       "click .reset-defense-button": =>
         Session.set "defendingCrystals", [0,0,0,0,0,0]
+      "click .play-spell": =>
+        App.getEnergy card.playCost, (retry, cancel) =>
+          if retry and canRetry
+            x=1
+          #  return @playDefensiveSpell cardIndex, 
+          else
+            "cancel"
+          Session.set "cardIndex", false
+          @cancelSpell()
     
     Template.energy_required.availableCrystals = =>
       stacks = []
@@ -314,12 +325,15 @@ class @GameController
       crystals = Crystals.findOne
         gameId: Session.get "gameId"
         owner: Meteor.userId()
+      return 0 if !crystals?.stacks?
       CrystalsHelper.totalCrystalCards crystals.stacks
     
     Template.trade.events
       "click .trade-card": (event) =>
         code = $(event.target).attr "data-code"
         App.call "tradeWithGypsy", code
+      "click .done": (event) =>
+        App.call "dontTradeWithGypsy"
     
     Template.wait_for_defense.stuff = =>
       true

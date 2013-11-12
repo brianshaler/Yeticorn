@@ -9,10 +9,10 @@ class @Deck
   constructor: (totalCards = 100) ->
     @cards = []
     
-    weaponCards = Math.floor totalCards * .2
-    spellCards = spellCards = Math.floor totalCards * .3
+    weaponCards = Math.floor totalCards * .3
+    spellCards = spellCards = Math.floor totalCards * .35
     crystalCards = Math.floor totalCards - weaponCards - spellCards
-
+    
     for i in [1..weaponCards]
       @cards.push Cards.getWeapon()
     for i in [1..spellCards]

@@ -231,12 +231,19 @@ Meteor.methods
           crystals?.stacks[0].push crystals?.stacks[i].pop()
           totalDefense += i
     
-    totalDamage = game.attack.energy - totalDefense
+    totalDamage = Gameplay.getDamage game.attack.weapon, game.attack.energy, game.spells
+    totalDamage -= totalDefense
     game.life[@userId] -= totalDamage if totalDamage > 0
-    game.life[@userId] = 0 if game.life[@userId] < 0
-    game.attack = false
+    
+    playerDied = false
+    if game.life[@userId] <= 0
+      game.life[@userId] = 0
+      playerDied = true
     
     livingPlayers = Gameplay.livingPlayers game
+    if livingPlayers.length > 1 and playerDied
+      MessageHelper.toAll gameId, Gameplay.declareDeath(getPlayer(game.attack.attacker), getPlayer(@userId))
+    
     if livingPlayers.length < 2
       if livingPlayers.length == 1
         game.winner = livingPlayers[0]
@@ -244,6 +251,9 @@ Meteor.methods
       else
         MessageHelper.toAll gameId, Gameplay.declareWinner()
       game.currentTurnId = false
+    
+    game.attack = false
+    
     Games.update _id: gameId,
       $set:
         life: game.life
@@ -253,6 +263,23 @@ Meteor.methods
     Crystals.update _id: crystals._id,
       $set:
         stacks: crystals.stacks
+  dontTradeWithGypsy: (gameId) ->
+    check gameId, String
+    
+    game = getGame gameId, @userId
+    
+    unless game.currentTurnId == @userId
+      throw new Meteor.Error 403, "Can't trade when it's not your turn"
+    
+    unless game.tradeWithGypsy
+      throw new Meteor.Error 403, "Can't trade with the gypsy right now"
+    
+    game.tradeWithGypsy = false
+    
+    Games.update _id: gameId,
+      $set:
+        gypsyCards: []
+        tradeWithGypsy: game.tradeWithGypsy
   tradeWithGypsy: (gameId, code) ->
     check gameId, String
     check code, String

@@ -74,6 +74,9 @@ class @Gameplay
     _.filter game.players, (playerId) ->
       game.life[playerId] > 0
   
+  @declareDeath: (killer, victim) ->
+    "#{killer.username} just killed #{victim.username}"
+  
   @declareWinner: (winner = false) ->
     if winner
       "#{winner.username} won!"

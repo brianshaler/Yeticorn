@@ -8,6 +8,9 @@
           <input type="button" class="btn crystals-button crystals-button-{{order}}" data-energy="{{order}}" value="{{order}}pt ({{count}})" {{#unless available}}disabled{{/unless}}/>
         {{/each}}
       </p>
+      {{#if hasDefensiveSpells}}
+      
+      {{/if}}
       <p>
         <input type="button" class="btn {{#if pendingDamage}}btn-danger{{else}}btn-success{{/if}} defense-button" value="{{#if pendingDamage}}Take it!{{else}}Defend!{{/if}}" />
         <input type="button" class="btn reset-defense-button" value="Reset" />

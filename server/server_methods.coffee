@@ -41,7 +41,7 @@ Meteor.methods
         gameId: gameId
         cards: handCards[i]
       stacks = [[],[],[],[],[],[]]
-      for [1..3]
+      for [1..5]
         stacks[1].push Cards.getCrystal()
       crystalsId = Crystals.insert
         owner: game.players[i]
@@ -149,21 +149,26 @@ Meteor.methods
             for i in [1..card.opponentRandomCard]
               if _hand.cards.length > 0
                 pickMe = Math.floor Math.random()*_hand.cards.length
-                if card.opponentCardTo and String(card.opponentCardTo) == "hand"
+                if card.opponentCardTo? and String(card.opponentCardTo) == "hand"
                   hand.cards.push _hand.cards[pickMe]
                 _hand.cards.splice pickMe, 1
             Hands.update _id: _hand._id,
               $set:
                 cards: _hand.cards
       if card.takeWeapon? == true
-        _.each options.opponents, (playerId) =>
-          if game.weapons[playerId]
-            hand.cards.push game.weapons[playerId]
+        if card.allPlayers? == true
+          targets = game.players
+        else
+          targets = options.opponents
+        _.each targets, (playerId) =>
+          if card.takenCardTo? and String(card.takenCardTo) == "hand"
+            if game.weapons[playerId]
+              hand.cards.push game.weapons[playerId]
           game.weapons[playerId] = false
       if card.loseLife? > 0
         _.each options.opponents, (playerId) =>
           game.life[playerId] -= card.loseLife
-      if card.myCardTo? == "weapon"
+      if card.myCardTo? and String(card.myCardTo) == "weapon"
         game.weapons[options.opponents[0]] = options.myCards[0]
       
       left = _.filter hand.cards, (card, index) =>
@@ -208,6 +213,20 @@ Meteor.methods
       Decks.update _id: deck._id,
         $set:
           cards: deck.cards
+  playDefensiveSpell: (gameId, cardIndex) ->
+    check gameId, String
+    check cardIndex, Number
+    
+    game = getGame gameId, @userId, true
+    hand = Hands.findOne
+      gameId: gameId
+      owner: @userId
+    card = hand.cards[cardIndex]
+    
+    unless game.attack?.defender == @userId
+      throw new Meteor.Error 403, "Why are you defending? You're not under attack.."
+    
+    
   endTurn: (gameId) ->
     check gameId, String
     
